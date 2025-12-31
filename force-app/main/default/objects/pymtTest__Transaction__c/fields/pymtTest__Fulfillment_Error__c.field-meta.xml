@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>pymtTest__Fulfillment_Error__c</fullName>
+    <label>Fulfillment Error</label>
+    <type>LongTextArea</type>
+    <length>5000</length>
+    <visibleLines>3</visibleLines>
+    <description>Error message if Order/Invoice creation failed</description>
+    <inlineHelpText>Contains error details if the automatic Order/Invoice creation failed</inlineHelpText>
+</CustomField>

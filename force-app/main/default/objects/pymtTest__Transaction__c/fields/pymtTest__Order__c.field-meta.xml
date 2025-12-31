@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>pymtTest__Order__c</fullName>
+    <label>Order</label>
+    <type>Lookup</type>
+    <referenceTo>Order</referenceTo>
+    <relationshipLabel>Transactions</relationshipLabel>
+    <relationshipName>Transactions</relationshipName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Link to the Order created from this transaction (for payment-first workflow)</description>
+    <inlineHelpText>The Order that was automatically created from this Call Center transaction</inlineHelpText>
+</CustomField>

@@ -1,0 +1,437 @@
+<template>
+    <lightning-card title="Call Center Payment" icon-name="standard:payment_gateway">
+        <div class="slds-p-horizontal_medium">
+            <!-- Loading Spinner -->
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </template>
+            
+            <div class="slds-grid slds-wrap slds-gutters">
+                <!-- Left Column: Account & Products -->
+                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                    <!-- Account Selection Section -->
+                    <div class="slds-box slds-m-bottom_medium">
+                        <h2 class="slds-text-heading_small slds-m-bottom_small">
+                            <lightning-icon icon-name="standard:account" size="small" class="slds-m-right_x-small"></lightning-icon>
+                            Customer Account
+                        </h2>
+                        
+                        <template if:true={showAccountSearch}>
+                            <div class="slds-form-element">
+                                <lightning-input 
+                                    type="search"
+                                    label="Search Accounts"
+                                    placeholder="Search by name, phone, or email..."
+                                    value={accountSearchTerm}
+                                    onchange={handleAccountSearch}>
+                                </lightning-input>
+                            </div>
+                            
+                            <template if:true={isSearchingAccounts}>
+                                <div class="slds-m-top_small">
+                                    <lightning-spinner alternative-text="Searching" size="small"></lightning-spinner>
+                                </div>
+                            </template>
+                            
+                            <template if:true={accountResults.length}>
+                                <div class="slds-dropdown slds-dropdown_fluid slds-is-open" style="position: relative;">
+                                    <ul class="slds-listbox slds-listbox_vertical" role="listbox">
+                                        <template for:each={accountResults} for:item="account">
+                                            <li key={account.Id} role="presentation" class="slds-listbox__item">
+                                                <div class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small"
+                                                     data-id={account.Id}
+                                                     onclick={selectAccount}
+                                                     role="option">
+                                                    <span class="slds-media__figure slds-listbox__option-icon">
+                                                        <lightning-icon icon-name="standard:account" size="small"></lightning-icon>
+                                                    </span>
+                                                    <span class="slds-media__body">
+                                                        <span class="slds-listbox__option-text slds-listbox__option-text_entity">
+                                                            {account.Name}
+                                                        </span>
+                                                        <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">
+                                                            {account.Phone} • {account.Email__c}
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                            
+                            <div class="slds-m-top_small">
+                                <lightning-button 
+                                    label="Create New Account" 
+                                    variant="neutral"
+                                    icon-name="utility:add"
+                                    onclick={openNewAccountModal}>
+                                </lightning-button>
+                            </div>
+                        </template>
+                        
+                        <template if:true={selectedAccount}>
+                            <div class="slds-media slds-media_center slds-box slds-theme_shade">
+                                <div class="slds-media__figure">
+                                    <lightning-icon icon-name="standard:account" size="medium"></lightning-icon>
+                                </div>
+                                <div class="slds-media__body">
+                                    <p class="slds-text-heading_small">{selectedAccount.Name}</p>
+                                    <p class="slds-text-body_small slds-text-color_weak">
+                                        {selectedAccount.Phone} • {selectedAccount.Email__c}
+                                    </p>
+                                </div>
+                                <div class="slds-media__figure slds-media__figure_reverse">
+                                    <lightning-button-icon 
+                                        icon-name="utility:close"
+                                        variant="bare"
+                                        alternative-text="Clear"
+                                        onclick={clearAccount}>
+                                    </lightning-button-icon>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <!-- Product Search Section -->
+                    <div class="slds-box slds-m-bottom_medium">
+                        <h2 class="slds-text-heading_small slds-m-bottom_small">
+                            <lightning-icon icon-name="standard:product" size="small" class="slds-m-right_x-small"></lightning-icon>
+                            Add Products
+                        </h2>
+                        
+                        <lightning-input 
+                            type="search"
+                            label="Search Products"
+                            placeholder="Search by name or product code..."
+                            value={productSearchTerm}
+                            onchange={handleProductSearch}
+                            disabled={noAccountSelected}>
+                        </lightning-input>
+                        
+                        <template if:true={isSearchingProducts}>
+                            <div class="slds-m-top_small">
+                                <lightning-spinner alternative-text="Searching" size="small"></lightning-spinner>
+                            </div>
+                        </template>
+                        
+                        <template if:true={productResults.length}>
+                            <div class="slds-m-top_small">
+                                <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                                    <thead>
+                                        <tr class="slds-line-height_reset">
+                                            <th scope="col">Product</th>
+                                            <th scope="col">Price</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={productResults} for:item="product">
+                                            <tr key={product.id}>
+                                                <td>
+                                                    <p class="slds-text-body_regular">{product.name}</p>
+                                                    <p class="slds-text-body_small slds-text-color_weak">{product.productCode}</p>
+                                                </td>
+                                                <td>${product.unitPrice}</td>
+                                                <td>
+                                                    <lightning-button-icon 
+                                                        icon-name="utility:add"
+                                                        variant="brand"
+                                                        alternative-text="Add to cart"
+                                                        data-id={product.id}
+                                                        onclick={addToCart}>
+                                                    </lightning-button-icon>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Cart & Payment -->
+                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                    <!-- Cart Section -->
+                    <div class="slds-box slds-m-bottom_medium">
+                        <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+                            <h2 class="slds-text-heading_small">
+                                <lightning-icon icon-name="utility:cart" size="small" class="slds-m-right_x-small"></lightning-icon>
+                                Cart
+                            </h2>
+                            <template if:true={hasCartItems}>
+                                <lightning-button 
+                                    label="Clear" 
+                                    variant="destructive-text"
+                                    onclick={clearCart}>
+                                </lightning-button>
+                            </template>
+                        </div>
+                        
+                        <template if:false={hasCartItems}>
+                            <div class="slds-illustration slds-illustration_small">
+                                <p class="slds-text-body_regular slds-text-color_weak slds-align_absolute-center">
+                                    Cart is empty. Search and add products above.
+                                </p>
+                            </div>
+                        </template>
+                        
+                        <template if:true={hasCartItems}>
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th scope="col">Product</th>
+                                        <th scope="col" style="width: 80px;">Qty</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col" style="width: 50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={cartItems} for:item="item">
+                                        <tr key={item.productId}>
+                                            <td>{item.productName}</td>
+                                            <td>
+                                                <lightning-input 
+                                                    type="number"
+                                                    min="1"
+                                                    value={item.quantity}
+                                                    data-id={item.productId}
+                                                    onchange={updateQuantity}
+                                                    variant="label-hidden">
+                                                </lightning-input>
+                                            </td>
+                                            <td>${item.totalPrice}</td>
+                                            <td>
+                                                <lightning-button-icon 
+                                                    icon-name="utility:delete"
+                                                    variant="bare"
+                                                    alternative-text="Remove"
+                                                    data-id={item.productId}
+                                                    onclick={removeFromCart}>
+                                                </lightning-button-icon>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2" class="slds-text-align_right"><strong>Total:</strong></td>
+                                        <td colspan="2"><strong>{formattedCartTotal}</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </template>
+                    </div>
+                    
+                    <!-- Payment Section -->
+                    <div class="slds-box slds-m-bottom_medium">
+                        <h2 class="slds-text-heading_small slds-m-bottom_small">
+                            <lightning-icon icon-name="standard:payment_gateway" size="small" class="slds-m-right_x-small"></lightning-icon>
+                            Payment
+                        </h2>
+                        
+                        <template if:true={hasPaymentMethods}>
+                            <lightning-radio-group 
+                                label="Saved Payment Methods"
+                                options={paymentMethodOptions}
+                                value={selectedPaymentMethodId}
+                                onchange={handlePaymentMethodChange}
+                                type="radio"
+                                class="slds-m-bottom_small">
+                            </lightning-radio-group>
+                            
+                            <lightning-button 
+                                label="Use New Payment Method" 
+                                variant="neutral"
+                                onclick={showNewPayment}
+                                class="slds-m-bottom_small">
+                            </lightning-button>
+                        </template>
+                        
+                        <template if:true={showNewPaymentForm}>
+                            <lightning-radio-group 
+                                label="Payment Type"
+                                options={paymentTypeOptions}
+                                value={paymentType}
+                                onchange={handlePaymentTypeChange}
+                                type="button"
+                                class="slds-m-bottom_small">
+                            </lightning-radio-group>
+                            
+                            <template if:true={isCardPayment}>
+                                <lightning-input 
+                                    type="text"
+                                    label="Card Number"
+                                    placeholder="1234 5678 9012 3456"
+                                    value={cardNumber}
+                                    data-field="cardNumber"
+                                    onchange={handlePaymentField}
+                                    class="slds-m-bottom_x-small">
+                                </lightning-input>
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col slds-size_1-of-3">
+                                        <lightning-input 
+                                            type="text"
+                                            label="Month"
+                                            placeholder="MM"
+                                            value={expirationMonth}
+                                            data-field="expirationMonth"
+                                            onchange={handlePaymentField}>
+                                        </lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3">
+                                        <lightning-input 
+                                            type="text"
+                                            label="Year"
+                                            placeholder="YYYY"
+                                            value={expirationYear}
+                                            data-field="expirationYear"
+                                            onchange={handlePaymentField}>
+                                        </lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3">
+                                        <lightning-input 
+                                            type="password"
+                                            label="CVV"
+                                            placeholder="123"
+                                            value={cvv}
+                                            data-field="cvv"
+                                            onchange={handlePaymentField}>
+                                        </lightning-input>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <template if:true={isACHPayment}>
+                                <lightning-input 
+                                    type="text"
+                                    label="Routing Number"
+                                    placeholder="9 digits"
+                                    value={routingNumber}
+                                    data-field="routingNumber"
+                                    onchange={handlePaymentField}
+                                    class="slds-m-bottom_x-small">
+                                </lightning-input>
+                                <lightning-input 
+                                    type="text"
+                                    label="Account Number"
+                                    value={accountNumber}
+                                    data-field="accountNumber"
+                                    onchange={handlePaymentField}
+                                    class="slds-m-bottom_x-small">
+                                </lightning-input>
+                                <lightning-combobox
+                                    label="Account Type"
+                                    options={accountTypeOptions}
+                                    value={accountType}
+                                    data-field="accountType"
+                                    onchange={handlePaymentField}>
+                                </lightning-combobox>
+                            </template>
+                            
+                            <lightning-input 
+                                type="checkbox"
+                                label="Save payment method for future use"
+                                checked={savePaymentMethod}
+                                onchange={handleSavePaymentMethodChange}
+                                class="slds-m-top_small">
+                            </lightning-input>
+                        </template>
+                        
+                        <template if:false={hasPaymentMethods}>
+                            <template if:false={showNewPaymentForm}>
+                                <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                                    No saved payment methods found.
+                                </p>
+                                <lightning-button 
+                                    label="Enter Payment Method" 
+                                    variant="brand"
+                                    onclick={showNewPayment}>
+                                </lightning-button>
+                            </template>
+                        </template>
+                    </div>
+                    
+                    <!-- Notes Section -->
+                    <div class="slds-box slds-m-bottom_medium">
+                        <lightning-textarea 
+                            label="Call Notes (Optional)"
+                            placeholder="Enter any notes about this transaction..."
+                            value={sourceDescription}
+                            onchange={handleSourceDescriptionChange}
+                            max-length="5000">
+                        </lightning-textarea>
+                    </div>
+                    
+                    <!-- Process Payment Button -->
+                    <div class="slds-text-align_center">
+                        <lightning-button 
+                            label="Process Payment"
+                            variant="brand"
+                            onclick={processPayment}
+                            disabled={cannotProcessPayment}
+                            class="slds-button_stretch">
+                        </lightning-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+    
+    <!-- New Account Modal -->
+    <template if:true={showNewAccountModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon 
+                        icon-name="utility:close"
+                        variant="bare-inverse"
+                        alternative-text="Close"
+                        class="slds-modal__close"
+                        onclick={closeNewAccountModal}>
+                    </lightning-button-icon>
+                    <h2 class="slds-modal__title">Create New Account</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-input 
+                        type="text"
+                        label="Account Name"
+                        required
+                        value={newAccountName}
+                        data-field="newAccountName"
+                        onchange={handleNewAccountField}
+                        class="slds-m-bottom_small">
+                    </lightning-input>
+                    <lightning-input 
+                        type="tel"
+                        label="Phone"
+                        value={newAccountPhone}
+                        data-field="newAccountPhone"
+                        onchange={handleNewAccountField}
+                        class="slds-m-bottom_small">
+                    </lightning-input>
+                    <lightning-input 
+                        type="email"
+                        label="Email"
+                        value={newAccountEmail}
+                        data-field="newAccountEmail"
+                        onchange={handleNewAccountField}>
+                    </lightning-input>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button 
+                        label="Cancel" 
+                        onclick={closeNewAccountModal}>
+                    </lightning-button>
+                    <lightning-button 
+                        label="Create Account" 
+                        variant="brand"
+                        onclick={createAccount}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

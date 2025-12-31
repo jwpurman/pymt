@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Sent as a reminder when an invoice payment is due</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Invoice Payment Reminder</name>
+    <style>none</style>
+    <subject>Invoice Reminder: {!relatedTo.Name} - Payment Due</subject>
+    <type>visualforce</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

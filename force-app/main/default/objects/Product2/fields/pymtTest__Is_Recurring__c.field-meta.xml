@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>pymtTest__Is_Recurring__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Indicates if this product is billed on a recurring basis</description>
+    <externalId>false</externalId>
+    <label>Is Recurring</label>
+    <type>Checkbox</type>
+</CustomField>

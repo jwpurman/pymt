@@ -1,0 +1,88 @@
+<messaging:emailTemplate subject="ACH Payment Returned - Immediate Action Required" recipientType="Contact" relatedToType="pymtTest__Transaction__c">
+    <messaging:htmlEmailBody >
+        <html>
+        <head>
+            <style type="text/css">
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background-color: #E65100; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; background-color: #f9f9f9; }
+                .details { background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+                .amount { font-size: 24px; color: #E65100; font-weight: bold; }
+                .return-code { background-color: #FFF3E0; padding: 10px; border-left: 4px solid #E65100; margin: 15px 0; }
+                .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+                .action-button { background-color: #1976D2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 15px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>ACH Payment Returned</h1>
+                </div>
+                <div class="content">
+                    <p>Dear Customer,</p>
+                    <p>Your ACH bank transfer has been returned by the bank. The original payment has been reversed and the balance is now due.</p>
+                    
+                    <div class="details">
+                        <p><strong>Transaction Number:</strong> {!relatedTo.Name}</p>
+                        <p><strong>Original Amount:</strong> <span class="amount">${!relatedTo.pymtTest__Amount__c}</span></p>
+                        <p><strong>Original Date:</strong> {!relatedTo.CreatedDate}</p>
+                    </div>
+                    
+                    <div class="return-code">
+                        <p><strong>Return Code:</strong> {!relatedTo.pymtTest__Return_Reason_Code__c}</p>
+                        <p><strong>Reason:</strong> {!relatedTo.pymtTest__Response_Message__c}</p>
+                    </div>
+                    
+                    <h3>Common Return Codes:</h3>
+                    <ul>
+                        <li><strong>R01:</strong> Insufficient funds in account</li>
+                        <li><strong>R02:</strong> Account closed</li>
+                        <li><strong>R03:</strong> Unable to locate account</li>
+                        <li><strong>R04:</strong> Invalid account number</li>
+                        <li><strong>R07:</strong> Authorization revoked</li>
+                        <li><strong>R08:</strong> Payment stopped</li>
+                    </ul>
+                    
+                    <p style="text-align: center;">
+                        <a href="#" class="action-button">Make a Payment</a>
+                    </p>
+                    
+                    <p>Please contact us immediately to arrange an alternative payment method to avoid any service interruption.</p>
+                </div>
+                <div class="footer">
+                    <p>This is an automated message. Please do not reply directly to this email.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    </messaging:htmlEmailBody>
+    <messaging:plainTextEmailBody >
+ACH Payment Returned - Immediate Action Required
+
+Dear Customer,
+
+Your ACH bank transfer has been returned by the bank. The original payment has been reversed and the balance is now due.
+
+Transaction Details:
+-------------------
+Transaction Number: {!relatedTo.Name}
+Original Amount: ${!relatedTo.pymtTest__Amount__c}
+Original Date: {!relatedTo.CreatedDate}
+
+Return Information:
+-------------------
+Return Code: {!relatedTo.pymtTest__Return_Reason_Code__c}
+Reason: {!relatedTo.pymtTest__Response_Message__c}
+
+Common Return Codes:
+- R01: Insufficient funds in account
+- R02: Account closed
+- R03: Unable to locate account
+- R04: Invalid account number
+- R07: Authorization revoked
+- R08: Payment stopped
+
+Please contact us immediately to arrange an alternative payment method to avoid any service interruption.
+    </messaging:plainTextEmailBody>
+</messaging:emailTemplate>

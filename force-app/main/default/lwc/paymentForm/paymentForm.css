@@ -1,0 +1,83 @@
+:host {
+    --card-border-color: #d8dde6;
+    --card-bg-color: #f3f3f3;
+}
+
+.amount-display {
+    background-color: var(--card-bg-color);
+    padding: 1rem;
+    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.amount-value {
+    color: #0070d2;
+    font-weight: bold;
+}
+
+.card-entry-section {
+    background-color: #fafaf9;
+    border: 1px solid var(--card-border-color);
+}
+
+.stripe-card-element {
+    padding: 12px;
+    border: 1px solid var(--card-border-color);
+    border-radius: 4px;
+    background-color: white;
+    min-height: 40px;
+}
+
+.card-type-indicator {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: #e8f4fd;
+    border-radius: 4px;
+}
+
+.payment-method-card {
+    border: 1px solid var(--card-border-color);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.payment-method-card:hover {
+    border-color: #0070d2;
+}
+
+.payment-method-card.selected {
+    border-color: #0070d2;
+    background-color: #f3f3f3;
+}
+
+.card-details {
+    display: flex;
+    align-items: center;
+}
+
+.card-info {
+    margin-left: 0.75rem;
+}
+
+.card-number {
+    font-weight: 500;
+}
+
+.card-expiry {
+    font-size: 0.875rem;
+    color: #706e6b;
+}
+
+.primary-badge {
+    background-color: #04844b;
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+}

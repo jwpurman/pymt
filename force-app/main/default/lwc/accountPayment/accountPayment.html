@@ -1,0 +1,151 @@
+<template>
+    <lightning-quick-action-panel header="Process Payment">
+        <div class="slds-p-around_medium">
+            <!-- Progress Indicator -->
+            <lightning-progress-indicator current-step={currentStep} type="path" class="slds-m-bottom_medium">
+                <lightning-progress-step label="Select Invoices" value="select"></lightning-progress-step>
+                <lightning-progress-step label="Payment" value="payment"></lightning-progress-step>
+                <lightning-progress-step label="Confirmation" value="confirmation"></lightning-progress-step>
+            </lightning-progress-indicator>
+            
+            <!-- Step 1: Invoice Selection -->
+            <template if:true={isSelectStep}>
+                <div class="step-content">
+                    <h2 class="slds-text-heading_medium slds-m-bottom_medium">Select Invoices to Pay</h2>
+                    
+                    <c-invoice-selector 
+                        account-id={recordId}
+                        onselectionchange={handleInvoiceSelectionChange}>
+                    </c-invoice-selector>
+                    
+                    <!-- Gateway Selection -->
+                    <template if:true={hasMultipleGateways}>
+                        <div class="slds-m-top_medium">
+                            <lightning-combobox
+                                name="gateway"
+                                label="Payment Gateway"
+                                value={selectedGatewayId}
+                                options={gatewayOptions}
+                                onchange={handleGatewayChange}>
+                            </lightning-combobox>
+                        </div>
+                    </template>
+                    
+                    <!-- Account Credits -->
+                    <template if:true={hasAccountCredits}>
+                        <div class="slds-m-top_medium slds-box credits-section">
+                            <h3 class="slds-text-heading_small slds-m-bottom_small">Account Credits</h3>
+                            <p class="slds-m-bottom_small">Available credit: {formattedAvailableCredit}</p>
+                            
+                            <lightning-input 
+                                type="checkbox"
+                                label="Apply account credits to this payment"
+                                checked={applyCredits}
+                                onchange={handleApplyCreditsChange}>
+                            </lightning-input>
+                            
+                            <template if:true={applyCredits}>
+                                <lightning-input
+                                    type="number"
+                                    label="Credit amount to apply"
+                                    value={creditAmountToApply}
+                                    onchange={handleCreditAmountChange}
+                                    formatter="currency"
+                                    step="0.01"
+                                    min="0"
+                                    max={totalAvailableCredit}
+                                    class="slds-m-top_small">
+                                </lightning-input>
+                            </template>
+                        </div>
+                    </template>
+                    
+                    <!-- Summary -->
+                    <div class="slds-m-top_medium summary-box">
+                        <div class="slds-grid slds-grid_align-spread">
+                            <span>Invoices Selected:</span>
+                            <span class="slds-text-body_regular">{invoiceCount}</span>
+                        </div>
+                        <div class="slds-grid slds-grid_align-spread slds-m-top_x-small">
+                            <span>Subtotal:</span>
+                            <span class="slds-text-body_regular">{formattedTotalAmount}</span>
+                        </div>
+                        <template if:true={applyCredits}>
+                            <div class="slds-grid slds-grid_align-spread slds-m-top_x-small credit-line">
+                                <span>Credits Applied:</span>
+                                <span>-{formattedCreditAmount}</span>
+                            </div>
+                        </template>
+                        <div class="slds-grid slds-grid_align-spread slds-m-top_small total-line">
+                            <span class="slds-text-heading_small">Amount Due:</span>
+                            <span class="slds-text-heading_small">{formattedAmountAfterCredits}</span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            
+            <!-- Step 2: Payment -->
+            <template if:true={isPaymentStep}>
+                <div class="step-content">
+                    <c-payment-form
+                        account-id={recordId}
+                        gateway-id={selectedGatewayId}
+                        amount={paymentAmount}
+                        invoice-allocations={allocationsForPayment}
+                        onpaymentsuccess={handlePaymentSuccess}
+                        onpaymentfailure={handlePaymentFailure}
+                        oncancel={handleBack}>
+                    </c-payment-form>
+                </div>
+            </template>
+            
+            <!-- Step 3: Confirmation -->
+            <template if:true={isConfirmationStep}>
+                <div class="step-content slds-text-align_center">
+                    <div class="slds-m-bottom_large">
+                        <lightning-icon icon-name="action:approval" size="large" class="success-icon"></lightning-icon>
+                    </div>
+                    <h2 class="slds-text-heading_large slds-m-bottom_small">Payment Successful!</h2>
+                    <p class="slds-text-body_regular slds-m-bottom_medium">
+                        Your payment of {formattedAmountAfterCredits} has been processed.
+                    </p>
+                    <p class="slds-text-body_small">
+                        Transaction ID: {paymentResult.gatewayTransactionId}
+                    </p>
+                </div>
+            </template>
+        </div>
+        
+        <!-- Footer Buttons -->
+        <div slot="footer">
+            <template if:true={isSelectStep}>
+                <lightning-button 
+                    label="Cancel" 
+                    onclick={handleCancel}>
+                </lightning-button>
+                <lightning-button 
+                    variant="brand" 
+                    label="Continue to Payment"
+                    onclick={handleNext}
+                    disabled={cannotProceedToPayment}
+                    class="slds-m-left_small">
+                </lightning-button>
+            </template>
+            
+            <template if:true={isPaymentStep}>
+                <lightning-button 
+                    label="Back" 
+                    onclick={handleBack}>
+                </lightning-button>
+            </template>
+            
+            <template if:true={isConfirmationStep}>
+                <lightning-button 
+                    variant="brand" 
+                    label="Done"
+                    onclick={handleDone}>
+                </lightning-button>
+            </template>
+        </div>
+    </lightning-quick-action-panel>
+</template>

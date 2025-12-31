@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>pymtTest__Type__c</fullName>
+    <description>Type of transaction</description>
+    <externalId>false</externalId>
+    <label>Type</label>
+    <required>true</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Sale</fullName>
+                <default>true</default>
+                <label>Sale</label>
+            </value>
+            <value>
+                <fullName>Authorize</fullName>
+                <default>false</default>
+                <label>Authorize</label>
+            </value>
+            <value>
+                <fullName>Capture</fullName>
+                <default>false</default>
+                <label>Capture</label>
+            </value>
+            <value>
+                <fullName>Refund</fullName>
+                <default>false</default>
+                <label>Refund</label>
+            </value>
+            <value>
+                <fullName>Void</fullName>
+                <default>false</default>
+                <label>Void</label>
+            </value>
+            <value>
+                <fullName>Credit</fullName>
+                <default>false</default>
+                <label>Credit</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

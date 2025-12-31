@@ -1,0 +1,142 @@
+<template>
+    <div class="invoice-selector">
+        <template if:true={isLoading}>
+            <div class="slds-p-around_medium slds-align_absolute-center">
+                <lightning-spinner alternative-text="Loading invoices..." size="medium"></lightning-spinner>
+            </div>
+        </template>
+        
+        <template if:true={error}>
+            <div class="slds-p-around_medium">
+                <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                    <span class="slds-assistive-text">error</span>
+                    <lightning-icon icon-name="utility:error" size="small" variant="inverse"></lightning-icon>
+                    <h2 class="slds-m-left_small">{error}</h2>
+                </div>
+            </div>
+        </template>
+        
+        <template if:false={isLoading}>
+            <template if:true={hasInvoices}>
+                <!-- Selection Summary -->
+                <div class="slds-grid slds-grid_align-spread slds-p-around_small selection-summary">
+                    <div>
+                        <span class="slds-text-body_regular">
+                            {selectedCount} invoice(s) selected
+                        </span>
+                    </div>
+                    <div>
+                        <span class="slds-text-heading_small">
+                            Total: {totalSelectedAmount}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Invoice Grid Header -->
+                <div class="slds-grid slds-grid_vertical-align-center invoice-header slds-p-around_x-small">
+                    <div class="slds-col slds-size_1-of-12">
+                        <lightning-input 
+                            type="checkbox"
+                            checked={allSelected}
+                            onchange={handleSelectAll}
+                            label="Select All"
+                            variant="label-hidden">
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_2-of-12">
+                        <span class="header-text">Invoice</span>
+                    </div>
+                    <div class="slds-col slds-size_2-of-12">
+                        <span class="header-text">Due Date</span>
+                    </div>
+                    <div class="slds-col slds-size_2-of-12 slds-text-align_right">
+                        <span class="header-text">Total</span>
+                    </div>
+                    <div class="slds-col slds-size_2-of-12 slds-text-align_right">
+                        <span class="header-text">Balance</span>
+                    </div>
+                    <div class="slds-col slds-size_3-of-12">
+                        <span class="header-text">Payment</span>
+                    </div>
+                </div>
+                
+                <!-- Invoice Rows -->
+                <template for:each={invoicesWithState} for:item="invoice">
+                    <div key={invoice.id} class={invoice.rowClass}>
+                        <div class="slds-grid slds-grid_vertical-align-center slds-p-around_x-small">
+                            <!-- Checkbox -->
+                            <div class="slds-col slds-size_1-of-12">
+                                <lightning-input 
+                                    type="checkbox"
+                                    data-id={invoice.id}
+                                    checked={invoice.selected}
+                                    onchange={handleInvoiceSelect}
+                                    label={invoice.name}
+                                    variant="label-hidden">
+                                </lightning-input>
+                            </div>
+                            
+                            <!-- Invoice Info -->
+                            <div class="slds-col slds-size_2-of-12">
+                                <a href={invoice.url} class="invoice-link">{invoice.name}</a>
+                                <span class={invoice.statusClass}>{invoice.status}</span>
+                            </div>
+                            
+                            <!-- Due Date -->
+                            <div class="slds-col slds-size_2-of-12">
+                                <span class={invoice.dueDateClass}>
+                                    {invoice.formattedDueDate}
+                                </span>
+                            </div>
+                            
+                            <!-- Total Amount -->
+                            <div class="slds-col slds-size_2-of-12 slds-text-align_right">
+                                {invoice.formattedTotalAmount}
+                            </div>
+                            
+                            <!-- Balance Due -->
+                            <div class="slds-col slds-size_2-of-12 slds-text-align_right">
+                                <span class="balance-amount">{invoice.formattedBalanceDue}</span>
+                            </div>
+                            
+                            <!-- Payment Type -->
+                            <div class="slds-col slds-size_3-of-12">
+                                <template if:true={invoice.selected}>
+                                    <lightning-combobox
+                                        data-id={invoice.id}
+                                        value={invoice.paymentType}
+                                        options={paymentTypeOptions}
+                                        onchange={handlePaymentTypeChange}
+                                        variant="label-hidden">
+                                    </lightning-combobox>
+                                    
+                                    <template if:true={invoice.showPartialAmount}>
+                                        <lightning-input
+                                            type="number"
+                                            data-id={invoice.id}
+                                            value={invoice.paymentAmount}
+                                            onchange={handlePartialAmountChange}
+                                            formatter="currency"
+                                            step="0.01"
+                                            min="0.01"
+                                            max={invoice.balanceDue}
+                                            class="slds-m-top_x-small">
+                                        </lightning-input>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </template>
+            
+            <template if:false={hasInvoices}>
+                <div class="slds-p-around_large slds-text-align_center">
+                    <lightning-icon icon-name="utility:check" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                    <p class="slds-text-heading_small">No open invoices</p>
+                    <p class="slds-text-body_regular slds-m-top_small">All invoices have been paid in full.</p>
+                </div>
+            </template>
+        </template>
+    </div>
+</template>

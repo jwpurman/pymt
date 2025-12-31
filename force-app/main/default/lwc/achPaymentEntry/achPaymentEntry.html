@@ -1,0 +1,178 @@
+<template>
+    <lightning-card title="Bank Account Payment" icon-name="standard:currency">
+        <div class="slds-p-around_medium">
+            <!-- Account Type Selection -->
+            <lightning-radio-group
+                name="accountType"
+                label="Account Type"
+                options={accountTypeOptions}
+                value={accountType}
+                onchange={handleAccountTypeChange}
+                type="button"
+                class="slds-m-bottom_medium">
+            </lightning-radio-group>
+
+            <!-- Bank Account Form -->
+            <div class="slds-grid slds-wrap slds-gutters">
+                <!-- Name on Account -->
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                    <lightning-input
+                        type="text"
+                        label="Name on Account"
+                        value={nameOnAccount}
+                        onchange={handleNameChange}
+                        required
+                        placeholder="John Doe"
+                        message-when-value-missing="Name on account is required">
+                    </lightning-input>
+                </div>
+
+                <!-- Bank Name -->
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                    <lightning-input
+                        type="text"
+                        label="Bank Name"
+                        value={bankName}
+                        onchange={handleBankNameChange}
+                        placeholder="First National Bank">
+                    </lightning-input>
+                </div>
+
+                <!-- Routing Number -->
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-input
+                        type="text"
+                        label="Routing Number"
+                        value={routingNumber}
+                        onchange={handleRoutingChange}
+                        required
+                        pattern="[0-9]{9}"
+                        maxlength="9"
+                        placeholder="123456789"
+                        message-when-pattern-mismatch="Routing number must be 9 digits"
+                        message-when-value-missing="Routing number is required">
+                    </lightning-input>
+                    <template if:true={routingNumber}>
+                        <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                            {bankInfo}
+                        </p>
+                    </template>
+                </div>
+
+                <!-- Account Number -->
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-input
+                        type="text"
+                        label="Account Number"
+                        value={accountNumber}
+                        onchange={handleAccountNumberChange}
+                        required
+                        pattern="[0-9]{4,17}"
+                        maxlength="17"
+                        placeholder="1234567890"
+                        message-when-pattern-mismatch="Account number must be 4-17 digits"
+                        message-when-value-missing="Account number is required">
+                    </lightning-input>
+                </div>
+
+                <!-- Confirm Account Number -->
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-input
+                        type="text"
+                        label="Confirm Account Number"
+                        value={confirmAccountNumber}
+                        onchange={handleConfirmAccountChange}
+                        required
+                        pattern="[0-9]{4,17}"
+                        maxlength="17"
+                        placeholder="1234567890"
+                        message-when-value-missing="Please confirm account number">
+                    </lightning-input>
+                </div>
+            </div>
+
+            <!-- Account Number Mismatch Warning -->
+            <template if:true={accountNumberMismatch}>
+                <div class="slds-notify slds-notify_alert slds-alert_warning slds-m-bottom_small" role="alert">
+                    <span class="slds-assistive-text">warning</span>
+                    <lightning-icon icon-name="utility:warning" variant="warning" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <h2>Account numbers do not match</h2>
+                </div>
+            </template>
+
+            <!-- Payment Amount (if in standalone mode) -->
+            <template if:true={showAmount}>
+                <div class="slds-m-bottom_medium">
+                    <lightning-input
+                        type="number"
+                        label="Payment Amount"
+                        value={amount}
+                        onchange={handleAmountChange}
+                        formatter="currency"
+                        step="0.01"
+                        min="0.01"
+                        required>
+                    </lightning-input>
+                </div>
+            </template>
+
+            <!-- Save Payment Method Option -->
+            <template if:true={allowSaveMethod}>
+                <lightning-input
+                    type="checkbox"
+                    label="Save this bank account for future payments"
+                    checked={savePaymentMethod}
+                    onchange={handleSaveMethodChange}
+                    class="slds-m-bottom_medium">
+                </lightning-input>
+            </template>
+
+            <!-- Authorization Agreement -->
+            <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_medium">
+                <lightning-input
+                    type="checkbox"
+                    label="I authorize this ACH debit from my bank account"
+                    checked={authorized}
+                    onchange={handleAuthorizationChange}
+                    required>
+                </lightning-input>
+                <p class="slds-text-body_small slds-m-top_x-small">
+                    By checking this box, I authorize the merchant to electronically debit my account and, 
+                    if necessary, electronically credit my account to correct erroneous debits.
+                </p>
+            </div>
+
+            <!-- Processing Info -->
+            <div class="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">
+                <lightning-icon icon-name="utility:info" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                ACH payments typically take 3-5 business days to process. You will receive a confirmation once the payment settles.
+            </div>
+
+            <!-- Error Display -->
+            <template if:true={error}>
+                <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_small" role="alert">
+                    <span class="slds-assistive-text">error</span>
+                    <h2>{error}</h2>
+                </div>
+            </template>
+
+            <!-- Action Buttons -->
+            <div class="slds-m-top_medium">
+                <template if:false={hideCancel}>
+                    <lightning-button
+                        variant="neutral"
+                        label="Cancel"
+                        onclick={handleCancel}
+                        class="slds-m-right_small">
+                    </lightning-button>
+                </template>
+                <lightning-button
+                    variant="brand"
+                    label={submitLabel}
+                    onclick={handleSubmit}
+                    disabled={isSubmitDisabled}>
+                </lightning-button>
+            </div>
+        </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,95 @@
+<template>
+    <lightning-quick-action-panel header="Pay Invoice">
+        <div class="slds-p-around_medium">
+            <!-- Payment Step -->
+            <template if:true={isPaymentStep}>
+                <!-- Invoice Info -->
+                <div class="slds-box slds-m-bottom_medium invoice-info">
+                    <div class="slds-grid slds-grid_align-spread">
+                        <span class="slds-text-title_caps">Invoice</span>
+                        <span class="slds-text-heading_small">{invoiceName}</span>
+                    </div>
+                    <div class="slds-grid slds-grid_align-spread slds-m-top_small">
+                        <span>Balance Due:</span>
+                        <span class="slds-text-heading_medium balance-amount">{formattedBalanceDue}</span>
+                    </div>
+                </div>
+                
+                <!-- Payment Type Selection -->
+                <lightning-radio-group
+                    name="paymentType"
+                    label="Payment Amount"
+                    options={paymentTypeOptions}
+                    value={paymentType}
+                    onchange={handlePaymentTypeChange}
+                    type="button"
+                    class="slds-m-bottom_medium">
+                </lightning-radio-group>
+                
+                <!-- Partial Amount Input -->
+                <template if:true={showPartialAmount}>
+                    <lightning-input
+                        type="number"
+                        label="Payment Amount"
+                        value={partialAmount}
+                        onchange={handlePartialAmountChange}
+                        formatter="currency"
+                        step="0.01"
+                        min="0.01"
+                        max={balanceDue}
+                        class="slds-m-bottom_medium">
+                    </lightning-input>
+                </template>
+                
+                <!-- Gateway Selection -->
+                <template if:true={hasMultipleGateways}>
+                    <lightning-combobox
+                        name="gateway"
+                        label="Payment Gateway"
+                        value={gatewayId}
+                        options={gatewayOptions}
+                        onchange={handleGatewayChange}
+                        class="slds-m-bottom_medium">
+                    </lightning-combobox>
+                </template>
+                
+                <!-- Payment Form -->
+                <c-payment-form
+                    account-id={accountId}
+                    gateway-id={gatewayId}
+                    amount={paymentAmount}
+                    invoice-allocations={invoiceAllocations}
+                    onpaymentsuccess={handlePaymentSuccess}
+                    onpaymentfailure={handlePaymentFailure}
+                    oncancel={handleCancel}>
+                </c-payment-form>
+            </template>
+            
+            <!-- Confirmation Step -->
+            <template if:true={isConfirmationStep}>
+                <div class="slds-text-align_center">
+                    <div class="slds-m-bottom_large">
+                        <lightning-icon icon-name="action:approval" size="large"></lightning-icon>
+                    </div>
+                    <h2 class="slds-text-heading_large slds-m-bottom_small">Payment Successful!</h2>
+                    <p class="slds-text-body_regular slds-m-bottom_medium">
+                        Your payment of {formattedPaymentAmount} for {invoiceName} has been processed.
+                    </p>
+                    <p class="slds-text-body_small">
+                        Transaction ID: {paymentResult.gatewayTransactionId}
+                    </p>
+                </div>
+            </template>
+        </div>
+        
+        <!-- Footer -->
+        <div slot="footer">
+            <template if:true={isPaymentStep}>
+                <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+            </template>
+            <template if:true={isConfirmationStep}>
+                <lightning-button variant="brand" label="Done" onclick={handleDone}></lightning-button>
+            </template>
+        </div>
+    </lightning-quick-action-panel>
+</template>

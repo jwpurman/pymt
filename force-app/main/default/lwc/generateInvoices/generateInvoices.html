@@ -1,0 +1,167 @@
+<template>
+    <lightning-card title="Generate Invoices" icon-name="standard:quotes">
+        <div class="slds-p-around_medium">
+            <template if:true={isLoading}>
+                <div class="slds-align_absolute-center slds-p-around_large">
+                    <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <!-- Order Summary -->
+                <template if:true={orderData}>
+                    <div class="slds-box slds-m-bottom_medium">
+                        <h3 class="slds-text-heading_small slds-m-bottom_small">Order Summary</h3>
+                        <dl class="slds-dl_horizontal">
+                            <dt class="slds-dl_horizontal__label">
+                                <span class="slds-truncate">Order Number:</span>
+                            </dt>
+                            <dd class="slds-dl_horizontal__detail">{orderData.OrderNumber}</dd>
+                            
+                            <dt class="slds-dl_horizontal__label">
+                                <span class="slds-truncate">Account:</span>
+                            </dt>
+                            <dd class="slds-dl_horizontal__detail">{orderData.Account.Name}</dd>
+                            
+                            <dt class="slds-dl_horizontal__label">
+                                <span class="slds-truncate">Start Date:</span>
+                            </dt>
+                            <dd class="slds-dl_horizontal__detail">{formattedStartDate}</dd>
+                            
+                            <dt class="slds-dl_horizontal__label">
+                                <span class="slds-truncate">End Date:</span>
+                            </dt>
+                            <dd class="slds-dl_horizontal__detail">{formattedEndDate}</dd>
+                            
+                            <dt class="slds-dl_horizontal__label">
+                                <span class="slds-truncate">Payment Frequency:</span>
+                            </dt>
+                            <dd class="slds-dl_horizontal__detail">{orderData.pymt__Payment_Frequency__c}</dd>
+                            
+                            <dt class="slds-dl_horizontal__label">
+                                <span class="slds-truncate">Total Value:</span>
+                            </dt>
+                            <dd class="slds-dl_horizontal__detail">
+                                <lightning-formatted-number value={orderData.TotalAmount} format-style="currency" currency-code="USD"></lightning-formatted-number>
+                            </dd>
+                        </dl>
+                    </div>
+
+                    <!-- Order Products -->
+                    <template if:true={hasProducts}>
+                        <h3 class="slds-text-heading_small slds-m-bottom_small">Order Products</h3>
+                        <lightning-datatable
+                            key-field="Id"
+                            data={orderData.OrderItems}
+                            columns={productColumns}
+                            hide-checkbox-column
+                            class="slds-m-bottom_medium">
+                        </lightning-datatable>
+                    </template>
+
+                    <!-- Invoice Preview -->
+                    <template if:true={invoicePreview}>
+                        <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_medium">
+                            <h3 class="slds-text-heading_small slds-m-bottom_small">Invoice Preview</h3>
+                            <p class="slds-m-bottom_x-small">
+                                <strong>{invoicePreview.count}</strong> invoice(s) will be generated:
+                            </p>
+                            <ul class="slds-list_dotted">
+                                <template for:each={invoicePreview.invoices} for:item="inv">
+                                    <li key={inv.date}>
+                                        {inv.date}: 
+                                        <lightning-formatted-number value={inv.amount} format-style="currency" currency-code="USD"></lightning-formatted-number>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+
+                    <!-- Options -->
+                    <div class="slds-m-bottom_medium">
+                        <lightning-combobox
+                            name="gateway"
+                            label="Payment Gateway"
+                            value={selectedGateway}
+                            options={gatewayOptions}
+                            onchange={handleGatewayChange}>
+                        </lightning-combobox>
+                        
+                        <lightning-input
+                            type="checkbox"
+                            label="Enable Auto-Pay"
+                            checked={enableAutoPay}
+                            onchange={handleAutoPayChange}
+                            class="slds-m-top_small">
+                        </lightning-input>
+                        
+                        <lightning-input
+                            type="number"
+                            label="Payment Terms (days)"
+                            value={paymentTerms}
+                            min="0"
+                            max="90"
+                            onchange={handleTermsChange}
+                            class="slds-m-top_small">
+                        </lightning-input>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="slds-m-top_medium">
+                        <lightning-button
+                            variant="neutral"
+                            label="Cancel"
+                            onclick={handleCancel}
+                            class="slds-m-right_small">
+                        </lightning-button>
+                        <lightning-button
+                            variant="brand"
+                            label="Generate Invoices"
+                            onclick={handleGenerate}
+                            disabled={isGenerating}>
+                        </lightning-button>
+                    </div>
+                </template>
+
+                <!-- Error State -->
+                <template if:true={error}>
+                    <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                        <span class="slds-assistive-text">error</span>
+                        <h2>{error}</h2>
+                    </div>
+                </template>
+
+                <!-- Success State -->
+                <template if:true={generatedInvoices}>
+                    <div class="slds-illustration slds-illustration_small">
+                        <div class="slds-text-longform">
+                            <h3 class="slds-text-heading_medium slds-text-color_success">
+                                <lightning-icon icon-name="utility:success" variant="success" size="small" class="slds-m-right_x-small"></lightning-icon>
+                                Invoices Generated Successfully!
+                            </h3>
+                            <p class="slds-text-body_regular slds-m-top_small">
+                                {generatedInvoices.length} invoice(s) have been created.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <lightning-datatable
+                        key-field="Id"
+                        data={generatedInvoices}
+                        columns={invoiceColumns}
+                        hide-checkbox-column
+                        class="slds-m-top_medium">
+                    </lightning-datatable>
+                    
+                    <div class="slds-m-top_medium slds-align_absolute-center">
+                        <lightning-button
+                            variant="brand"
+                            label="View Invoices"
+                            onclick={handleViewInvoices}>
+                        </lightning-button>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+</template>

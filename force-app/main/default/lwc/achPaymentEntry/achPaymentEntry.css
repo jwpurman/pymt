@@ -1,0 +1,11 @@
+.slds-box {
+    border-radius: 0.25rem;
+}
+
+.slds-alert_warning {
+    padding: 0.5rem 1rem;
+}
+
+.slds-alert_error {
+    padding: 0.5rem 1rem;
+}

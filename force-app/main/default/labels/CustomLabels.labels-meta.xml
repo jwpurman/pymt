@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <!-- Payment Status Labels -->
+    <labels>
+        <fullName>pymtTest__Payment_Approved</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Payment Approved</shortDescription>
+        <value>Payment approved successfully</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Payment_Declined</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Payment Declined</shortDescription>
+        <value>Payment was declined</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Payment_Processing</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Payment Processing</shortDescription>
+        <value>Processing payment...</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Payment_Error</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Payment Error</shortDescription>
+        <value>An error occurred while processing your payment</value>
+    </labels>
+    
+    <!-- ACH Return Code Labels -->
+    <labels>
+        <fullName>pymtTest__ACH_Return_R01</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>ACH Return R01</shortDescription>
+        <value>Insufficient Funds - The account does not have sufficient funds to cover the transaction</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__ACH_Return_R02</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>ACH Return R02</shortDescription>
+        <value>Account Closed - The bank account has been closed</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__ACH_Return_R03</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>ACH Return R03</shortDescription>
+        <value>No Account/Unable to Locate Account - The account number does not correspond to a valid account</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__ACH_Return_R04</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>ACH Return R04</shortDescription>
+        <value>Invalid Account Number - The account number structure is not valid</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__ACH_Return_R07</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>ACH Return R07</shortDescription>
+        <value>Authorization Revoked by Customer - The customer has revoked the authorization</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__ACH_Return_R08</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>ACH Return R08</shortDescription>
+        <value>Payment Stopped - The customer has placed a stop payment on this transaction</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__ACH_Return_R10</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>ACH Return R10</shortDescription>
+        <value>Customer Advises Originator Not Known - The customer states they do not know the originator</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__ACH_Return_R29</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>ACH Return R29</shortDescription>
+        <value>Corporate Customer Advises Not Authorized - Corporate customer states transaction was not authorized</value>
+    </labels>
+    
+    <!-- Settlement Status Labels -->
+    <labels>
+        <fullName>pymtTest__Settlement_Pending</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Settlement Pending</shortDescription>
+        <value>Pending</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Settlement_Pending_Settlement</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Settlement Pending Settlement</shortDescription>
+        <value>Pending Settlement</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Settlement_Settled</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Settlement Settled</shortDescription>
+        <value>Settled</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Settlement_Error</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Settlement Error</shortDescription>
+        <value>Settlement Error</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Settlement_Returned</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Settlement Returned</shortDescription>
+        <value>Returned</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Settlement_Voided</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Settlement Voided</shortDescription>
+        <value>Voided</value>
+    </labels>
+    
+    <!-- UI Labels -->
+    <labels>
+        <fullName>pymtTest__Make_Payment</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Make Payment</shortDescription>
+        <value>Make Payment</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Pay_Invoice</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Pay Invoice</shortDescription>
+        <value>Pay Invoice</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Add_Payment_Method</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Add Payment Method</shortDescription>
+        <value>Add Payment Method</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Select_Payment_Method</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Select Payment Method</shortDescription>
+        <value>Select Payment Method</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Payment_Amount</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Payment Amount</shortDescription>
+        <value>Payment Amount</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Balance_Due</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Balance Due</shortDescription>
+        <value>Balance Due</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__No_Payment_Methods</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>No Payment Methods</shortDescription>
+        <value>No payment methods on file. Please add a payment method to continue.</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Card_Expiring_Soon</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Card Expiring Soon</shortDescription>
+        <value>This card is expiring soon. Please update your payment method.</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__ACH_Processing_Time</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>ACH Processing Time</shortDescription>
+        <value>ACH payments typically take 3-5 business days to process.</value>
+    </labels>
+    
+    <!-- Error Messages -->
+    <labels>
+        <fullName>pymtTest__Error_No_Gateway</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Error No Gateway</shortDescription>
+        <value>No payment gateway configured. Please contact your administrator.</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Error_Invalid_Amount</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Error Invalid Amount</shortDescription>
+        <value>Please enter a valid payment amount.</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Error_Exceeds_Balance</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Error Exceeds Balance</shortDescription>
+        <value>Payment amount cannot exceed the balance due.</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Error_Gateway_Connection</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Error Gateway Connection</shortDescription>
+        <value>Unable to connect to payment gateway. Please try again later.</value>
+    </labels>
+    <labels>
+        <fullName>pymtTest__Error_Card_Expired</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Error Card Expired</shortDescription>
+        <value>The selected payment method has expired. Please use a different payment method.</value>
+    </labels>
+</CustomLabels>

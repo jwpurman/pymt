@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Sent when a payment card is about to expire</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Card Expiring Soon</name>
+    <style>none</style>
+    <subject>Your Payment Card is Expiring Soon</subject>
+    <type>visualforce</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

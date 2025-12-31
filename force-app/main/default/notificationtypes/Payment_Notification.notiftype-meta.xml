@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomNotificationType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customNotifTypeName>Payment_Notification</customNotifTypeName>
+    <description>Notifications for payment-related events including successful payments, failures, ACH returns, and card expirations</description>
+    <desktop>true</desktop>
+    <masterLabel>Payment Notification</masterLabel>
+    <mobile>true</mobile>
+    <slack>false</slack>
+</CustomNotificationType>

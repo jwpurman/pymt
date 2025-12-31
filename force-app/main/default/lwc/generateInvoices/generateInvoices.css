@@ -1,0 +1,19 @@
+.slds-dl_horizontal__label {
+    width: 40%;
+}
+
+.slds-dl_horizontal__detail {
+    width: 60%;
+}
+
+.slds-box {
+    border-radius: 0.25rem;
+}
+
+.slds-list_dotted {
+    margin-left: 1.5rem;
+}
+
+.slds-list_dotted li {
+    margin-bottom: 0.25rem;
+}

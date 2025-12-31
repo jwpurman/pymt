@@ -1,0 +1,37 @@
+:host {
+    --icon-size-small: 24px;
+    --icon-size-medium: 32px;
+    --icon-size-large: 48px;
+}
+
+.card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.card-icon-small {
+    width: var(--icon-size-small);
+    height: calc(var(--icon-size-small) * 0.65);
+    font-size: 10px;
+}
+
+.card-icon-medium {
+    width: var(--icon-size-medium);
+    height: calc(var(--icon-size-medium) * 0.65);
+    font-size: 12px;
+}
+
+.card-icon-large {
+    width: var(--icon-size-large);
+    height: calc(var(--icon-size-large) * 0.65);
+    font-size: 16px;
+}
+
+.brand-text {
+    letter-spacing: -0.5px;
+}

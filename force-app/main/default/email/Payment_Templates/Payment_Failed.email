@@ -1,0 +1,77 @@
+<messaging:emailTemplate subject="Payment Failed - Action Required" recipientType="Contact" relatedToType="pymtTest__Transaction__c">
+    <messaging:htmlEmailBody >
+        <html>
+        <head>
+            <style type="text/css">
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background-color: #D32F2F; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; background-color: #f9f9f9; }
+                .details { background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+                .amount { font-size: 24px; color: #D32F2F; font-weight: bold; }
+                .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+                .warning-icon { font-size: 48px; color: #D32F2F; }
+                .action-button { background-color: #1976D2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 15px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Payment Failed</h1>
+                </div>
+                <div class="content">
+                    <p style="text-align: center;" class="warning-icon">⚠</p>
+                    <p>Dear Customer,</p>
+                    <p>Unfortunately, we were unable to process your payment. Please review the details below:</p>
+                    
+                    <div class="details">
+                        <p><strong>Transaction Number:</strong> {!relatedTo.Name}</p>
+                        <p><strong>Amount:</strong> <span class="amount">${!relatedTo.pymtTest__Amount__c}</span></p>
+                        <p><strong>Date:</strong> {!relatedTo.CreatedDate}</p>
+                        <p><strong>Reason:</strong> {!relatedTo.pymtTest__Response_Message__c}</p>
+                    </div>
+                    
+                    <h3>What to do next:</h3>
+                    <ul>
+                        <li>Verify your payment information is correct</li>
+                        <li>Ensure sufficient funds are available</li>
+                        <li>Check that your card hasn't expired</li>
+                        <li>Try a different payment method if available</li>
+                    </ul>
+                    
+                    <p style="text-align: center;">
+                        <a href="#" class="action-button">Update Payment Method</a>
+                    </p>
+                    
+                    <p>If you continue to experience issues, please contact our support team for assistance.</p>
+                </div>
+                <div class="footer">
+                    <p>This is an automated message. Please do not reply directly to this email.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    </messaging:htmlEmailBody>
+    <messaging:plainTextEmailBody >
+Payment Failed - Action Required
+
+Dear Customer,
+
+Unfortunately, we were unable to process your payment.
+
+Transaction Details:
+-------------------
+Transaction Number: {!relatedTo.Name}
+Amount: ${!relatedTo.pymtTest__Amount__c}
+Date: {!relatedTo.CreatedDate}
+Reason: {!relatedTo.pymtTest__Response_Message__c}
+
+What to do next:
+- Verify your payment information is correct
+- Ensure sufficient funds are available
+- Check that your card hasn't expired
+- Try a different payment method if available
+
+If you continue to experience issues, please contact our support team for assistance.
+    </messaging:plainTextEmailBody>
+</messaging:emailTemplate>

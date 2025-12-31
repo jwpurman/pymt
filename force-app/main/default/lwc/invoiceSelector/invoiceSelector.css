@@ -1,0 +1,77 @@
+:host {
+    --border-color: #d8dde6;
+    --selected-bg: #f3f3f3;
+    --hover-bg: #fafaf9;
+    --overdue-color: #c23934;
+}
+
+.invoice-selector {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.selection-summary {
+    background-color: #f3f3f3;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.invoice-header {
+    background-color: #fafaf9;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+}
+
+.header-text {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #706e6b;
+    letter-spacing: 0.025rem;
+}
+
+.invoice-row {
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.15s;
+}
+
+.invoice-row:last-child {
+    border-bottom: none;
+}
+
+.invoice-row:hover {
+    background-color: var(--hover-bg);
+}
+
+.invoice-row.selected {
+    background-color: var(--selected-bg);
+}
+
+.invoice-row.overdue {
+    border-left: 3px solid var(--overdue-color);
+}
+
+.invoice-link {
+    color: #0070d2;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.invoice-link:hover {
+    text-decoration: underline;
+}
+
+.balance-amount {
+    font-weight: 600;
+    color: #0070d2;
+}
+
+.overdue-text {
+    color: var(--overdue-color);
+    font-weight: 500;
+}
+
+.slds-badge {
+    font-size: 0.65rem;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
