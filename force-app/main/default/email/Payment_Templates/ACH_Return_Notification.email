@@ -1,4 +1,4 @@
-<messaging:emailTemplate subject="ACH Payment Returned - Immediate Action Required" recipientType="Contact" relatedToType="pymtTest__Transaction__c">
+<messaging:emailTemplate subject="ACH Payment Returned - Immediate Action Required" recipientType="Contact" relatedToType="pymts__Transaction__c">
     <messaging:htmlEmailBody >
         <html>
         <head>
@@ -25,13 +25,13 @@
                     
                     <div class="details">
                         <p><strong>Transaction Number:</strong> {!relatedTo.Name}</p>
-                        <p><strong>Original Amount:</strong> <span class="amount">${!relatedTo.pymtTest__Amount__c}</span></p>
+                        <p><strong>Original Amount:</strong> <span class="amount">${!relatedTo.pymts__Amount__c}</span></p>
                         <p><strong>Original Date:</strong> {!relatedTo.CreatedDate}</p>
                     </div>
                     
                     <div class="return-code">
-                        <p><strong>Return Code:</strong> {!relatedTo.pymtTest__Return_Reason_Code__c}</p>
-                        <p><strong>Reason:</strong> {!relatedTo.pymtTest__Response_Message__c}</p>
+                        <p><strong>Return Code:</strong> {!relatedTo.pymts__Return_Reason_Code__c}</p>
+                        <p><strong>Reason:</strong> {!relatedTo.pymts__Response_Message__c}</p>
                     </div>
                     
                     <h3>Common Return Codes:</h3>
@@ -67,13 +67,13 @@ Your ACH bank transfer has been returned by the bank. The original payment has b
 Transaction Details:
 -------------------
 Transaction Number: {!relatedTo.Name}
-Original Amount: ${!relatedTo.pymtTest__Amount__c}
+Original Amount: ${!relatedTo.pymts__Amount__c}
 Original Date: {!relatedTo.CreatedDate}
 
 Return Information:
 -------------------
-Return Code: {!relatedTo.pymtTest__Return_Reason_Code__c}
-Reason: {!relatedTo.pymtTest__Response_Message__c}
+Return Code: {!relatedTo.pymts__Return_Reason_Code__c}
+Reason: {!relatedTo.pymts__Response_Message__c}
 
 Common Return Codes:
 - R01: Insufficient funds in account

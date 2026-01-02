@@ -24,12 +24,12 @@ private class OrderFulfillmentQueueableTest {
         insert pbes;
         
         // Create payment gateway
-        pymtTest__Payment_Gateway__c gateway = new pymtTest__Payment_Gateway__c(
+        pymts__Payment_Gateway__c gateway = new pymts__Payment_Gateway__c(
             Name = 'Test Gateway',
-            pymtTest__Gateway_Type__c = 'Stripe',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = true,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Stripe',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = true,
+            pymts__Environment__c = 'Test'
         );
         insert gateway;
         
@@ -43,30 +43,30 @@ private class OrderFulfillmentQueueableTest {
         List<Product2> products = [SELECT Id FROM Product2 ORDER BY Name];
         
         // Create transaction
-        pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = acc.Id,
-            pymtTest__Amount__c = 200.00,
-            pymtTest__Status__c = 'Completed',
-            pymtTest__Type__c = 'Sale',
-            pymtTest__Sales_Channel__c = 'Phone',
-            pymtTest__Fulfillment_Status__c = 'Pending',
-            pymtTest__Gateway_Transaction_Id__c = 'test_txn_123'
+        pymts__Transaction__c txn = new pymts__Transaction__c(
+            pymts__Account__c = acc.Id,
+            pymts__Amount__c = 200.00,
+            pymts__Status__c = 'Completed',
+            pymts__Type__c = 'Sale',
+            pymts__Sales_Channel__c = 'Phone',
+            pymts__Fulfillment_Status__c = 'Pending',
+            pymts__Gateway_Transaction_Id__c = 'test_txn_123'
         );
         insert txn;
         
         // Create line items
-        List<pymtTest__Transaction_Line_Item__c> lineItems = new List<pymtTest__Transaction_Line_Item__c>();
-        lineItems.add(new pymtTest__Transaction_Line_Item__c(
-            pymtTest__Transaction__c = txn.Id,
-            pymtTest__Product__c = products[0].Id,
-            pymtTest__Quantity__c = 1,
-            pymtTest__Unit_Price__c = 100.00
+        List<pymts__Transaction_Line_Item__c> lineItems = new List<pymts__Transaction_Line_Item__c>();
+        lineItems.add(new pymts__Transaction_Line_Item__c(
+            pymts__Transaction__c = txn.Id,
+            pymts__Product__c = products[0].Id,
+            pymts__Quantity__c = 1,
+            pymts__Unit_Price__c = 100.00
         ));
-        lineItems.add(new pymtTest__Transaction_Line_Item__c(
-            pymtTest__Transaction__c = txn.Id,
-            pymtTest__Product__c = products[1].Id,
-            pymtTest__Quantity__c = 2,
-            pymtTest__Unit_Price__c = 50.00
+        lineItems.add(new pymts__Transaction_Line_Item__c(
+            pymts__Transaction__c = txn.Id,
+            pymts__Product__c = products[1].Id,
+            pymts__Quantity__c = 2,
+            pymts__Unit_Price__c = 50.00
         ));
         insert lineItems;
         
@@ -75,16 +75,16 @@ private class OrderFulfillmentQueueableTest {
         Test.stopTest();
         
         // Verify transaction was updated
-        pymtTest__Transaction__c updatedTxn = [
-            SELECT pymtTest__Fulfillment_Status__c, pymtTest__Order__c
-            FROM pymtTest__Transaction__c
+        pymts__Transaction__c updatedTxn = [
+            SELECT pymts__Fulfillment_Status__c, pymts__Order__c
+            FROM pymts__Transaction__c
             WHERE Id = :txn.Id
         ];
-        System.assertEquals('Complete', updatedTxn.pymtTest__Fulfillment_Status__c, 'Fulfillment should be complete');
-        System.assertNotEquals(null, updatedTxn.pymtTest__Order__c, 'Order should be linked');
+        System.assertEquals('Complete', updatedTxn.pymts__Fulfillment_Status__c, 'Fulfillment should be complete');
+        System.assertNotEquals(null, updatedTxn.pymts__Order__c, 'Order should be linked');
         
         // Verify Order was created
-        Order createdOrder = [SELECT Id, Status, AccountId FROM Order WHERE Id = :updatedTxn.pymtTest__Order__c];
+        Order createdOrder = [SELECT Id, Status, AccountId FROM Order WHERE Id = :updatedTxn.pymts__Order__c];
         System.assertEquals('Activated', createdOrder.Status, 'Order should be activated');
         System.assertEquals(acc.Id, createdOrder.AccountId, 'Order should be linked to account');
         
@@ -93,34 +93,34 @@ private class OrderFulfillmentQueueableTest {
         System.assertEquals(2, orderItems.size(), 'Should have 2 order items');
         
         // Verify Invoice was created
-        List<pymtTest__Invoice__c> invoices = [
-            SELECT pymtTest__Status__c, pymtTest__Total_Amount__c, pymtTest__Amount_Paid__c
-            FROM pymtTest__Invoice__c
-            WHERE pymtTest__Order__c = :createdOrder.Id
+        List<pymts__Invoice__c> invoices = [
+            SELECT pymts__Status__c, pymts__Total_Amount__c, pymts__Amount_Paid__c
+            FROM pymts__Invoice__c
+            WHERE pymts__Order__c = :createdOrder.Id
         ];
         System.assertEquals(1, invoices.size(), 'Should have 1 invoice');
-        System.assertEquals('Paid', invoices[0].pymtTest__Status__c, 'Invoice should be Paid');
-        System.assertEquals(200.00, invoices[0].pymtTest__Total_Amount__c, 'Invoice total should match');
+        System.assertEquals('Paid', invoices[0].pymts__Status__c, 'Invoice should be Paid');
+        System.assertEquals(200.00, invoices[0].pymts__Total_Amount__c, 'Invoice total should match');
         
         // Verify Invoice Line Items
-        List<pymtTest__Invoice_Line_Item__c> invoiceLines = [
-            SELECT Id FROM pymtTest__Invoice_Line_Item__c WHERE pymtTest__Invoice__c = :invoices[0].Id
+        List<pymts__Invoice_Line_Item__c> invoiceLines = [
+            SELECT Id FROM pymts__Invoice_Line_Item__c WHERE pymts__Invoice__c = :invoices[0].Id
         ];
         System.assertEquals(2, invoiceLines.size(), 'Should have 2 invoice line items');
         
         // Verify Payment Allocation
-        List<pymtTest__Payment_Allocation__c> allocations = [
-            SELECT pymtTest__Amount__c FROM pymtTest__Payment_Allocation__c WHERE pymtTest__Transaction__c = :txn.Id
+        List<pymts__Payment_Allocation__c> allocations = [
+            SELECT pymts__Amount__c FROM pymts__Payment_Allocation__c WHERE pymts__Transaction__c = :txn.Id
         ];
         System.assertEquals(1, allocations.size(), 'Should have 1 allocation');
-        System.assertEquals(200.00, allocations[0].pymtTest__Amount__c, 'Allocation amount should match');
+        System.assertEquals(200.00, allocations[0].pymts__Amount__c, 'Allocation amount should match');
         
         // Verify Transaction Line Items were updated with Order Product references
-        List<pymtTest__Transaction_Line_Item__c> updatedLineItems = [
-            SELECT pymtTest__Order_Product__c FROM pymtTest__Transaction_Line_Item__c WHERE pymtTest__Transaction__c = :txn.Id
+        List<pymts__Transaction_Line_Item__c> updatedLineItems = [
+            SELECT pymts__Order_Product__c FROM pymts__Transaction_Line_Item__c WHERE pymts__Transaction__c = :txn.Id
         ];
-        for (pymtTest__Transaction_Line_Item__c li : updatedLineItems) {
-            System.assertNotEquals(null, li.pymtTest__Order_Product__c, 'Line item should be linked to order product');
+        for (pymts__Transaction_Line_Item__c li : updatedLineItems) {
+            System.assertNotEquals(null, li.pymts__Order_Product__c, 'Line item should be linked to order product');
         }
     }
     
@@ -130,22 +130,22 @@ private class OrderFulfillmentQueueableTest {
         Product2 product = [SELECT Id FROM Product2 LIMIT 1];
         
         // Create transaction with single item
-        pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = acc.Id,
-            pymtTest__Amount__c = 500.00,
-            pymtTest__Status__c = 'Completed',
-            pymtTest__Type__c = 'Sale',
-            pymtTest__Sales_Channel__c = 'Phone',
-            pymtTest__Fulfillment_Status__c = 'Pending'
+        pymts__Transaction__c txn = new pymts__Transaction__c(
+            pymts__Account__c = acc.Id,
+            pymts__Amount__c = 500.00,
+            pymts__Status__c = 'Completed',
+            pymts__Type__c = 'Sale',
+            pymts__Sales_Channel__c = 'Phone',
+            pymts__Fulfillment_Status__c = 'Pending'
         );
         insert txn;
         
-        pymtTest__Transaction_Line_Item__c lineItem = new pymtTest__Transaction_Line_Item__c(
-            pymtTest__Transaction__c = txn.Id,
-            pymtTest__Product__c = product.Id,
-            pymtTest__Quantity__c = 5,
-            pymtTest__Unit_Price__c = 100.00,
-            pymtTest__Description__c = 'Bulk order'
+        pymts__Transaction_Line_Item__c lineItem = new pymts__Transaction_Line_Item__c(
+            pymts__Transaction__c = txn.Id,
+            pymts__Product__c = product.Id,
+            pymts__Quantity__c = 5,
+            pymts__Unit_Price__c = 100.00,
+            pymts__Description__c = 'Bulk order'
         );
         insert lineItem;
         
@@ -153,12 +153,12 @@ private class OrderFulfillmentQueueableTest {
         System.enqueueJob(new OrderFulfillmentQueueable(txn.Id));
         Test.stopTest();
         
-        pymtTest__Transaction__c result = [SELECT pymtTest__Fulfillment_Status__c FROM pymtTest__Transaction__c WHERE Id = :txn.Id];
-        System.assertEquals('Complete', result.pymtTest__Fulfillment_Status__c);
+        pymts__Transaction__c result = [SELECT pymts__Fulfillment_Status__c FROM pymts__Transaction__c WHERE Id = :txn.Id];
+        System.assertEquals('Complete', result.pymts__Fulfillment_Status__c);
         
         // Verify single order item with correct quantity
-        pymtTest__Transaction__c txnWithOrder = [SELECT pymtTest__Order__c FROM pymtTest__Transaction__c WHERE Id = :txn.Id];
-        OrderItem oi = [SELECT Quantity, Description FROM OrderItem WHERE OrderId = :txnWithOrder.pymtTest__Order__c];
+        pymts__Transaction__c txnWithOrder = [SELECT pymts__Order__c FROM pymts__Transaction__c WHERE Id = :txn.Id];
+        OrderItem oi = [SELECT Quantity, Description FROM OrderItem WHERE OrderId = :txnWithOrder.pymts__Order__c];
         System.assertEquals(5, oi.Quantity, 'Order item quantity should be 5');
         System.assertEquals('Bulk order', oi.Description, 'Description should be carried over');
     }
@@ -168,13 +168,13 @@ private class OrderFulfillmentQueueableTest {
         Account acc = [SELECT Id FROM Account LIMIT 1];
         
         // Create transaction WITHOUT line items
-        pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = acc.Id,
-            pymtTest__Amount__c = 100.00,
-            pymtTest__Status__c = 'Completed',
-            pymtTest__Type__c = 'Sale',
-            pymtTest__Sales_Channel__c = 'Phone',
-            pymtTest__Fulfillment_Status__c = 'Pending'
+        pymts__Transaction__c txn = new pymts__Transaction__c(
+            pymts__Account__c = acc.Id,
+            pymts__Amount__c = 100.00,
+            pymts__Status__c = 'Completed',
+            pymts__Type__c = 'Sale',
+            pymts__Sales_Channel__c = 'Phone',
+            pymts__Fulfillment_Status__c = 'Pending'
         );
         insert txn;
         
@@ -182,13 +182,13 @@ private class OrderFulfillmentQueueableTest {
         System.enqueueJob(new OrderFulfillmentQueueable(txn.Id));
         Test.stopTest();
         
-        pymtTest__Transaction__c result = [
-            SELECT pymtTest__Fulfillment_Status__c, pymtTest__Fulfillment_Error__c
-            FROM pymtTest__Transaction__c 
+        pymts__Transaction__c result = [
+            SELECT pymts__Fulfillment_Status__c, pymts__Fulfillment_Error__c
+            FROM pymts__Transaction__c 
             WHERE Id = :txn.Id
         ];
-        System.assertEquals('Failed', result.pymtTest__Fulfillment_Status__c, 'Should fail without line items');
-        System.assert(result.pymtTest__Fulfillment_Error__c.contains('No line items'), 'Error should mention line items');
+        System.assertEquals('Failed', result.pymts__Fulfillment_Status__c, 'Should fail without line items');
+        System.assert(result.pymts__Fulfillment_Error__c.contains('No line items'), 'Error should mention line items');
     }
     
     @isTest
@@ -196,20 +196,20 @@ private class OrderFulfillmentQueueableTest {
         Account acc = [SELECT Id FROM Account LIMIT 1];
         Product2 product = [SELECT Id FROM Product2 LIMIT 1];
         
-        pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = acc.Id,
-            pymtTest__Amount__c = 100.00,
-            pymtTest__Status__c = 'Completed',
-            pymtTest__Sales_Channel__c = 'Phone',
-            pymtTest__Fulfillment_Status__c = 'Pending'
+        pymts__Transaction__c txn = new pymts__Transaction__c(
+            pymts__Account__c = acc.Id,
+            pymts__Amount__c = 100.00,
+            pymts__Status__c = 'Completed',
+            pymts__Sales_Channel__c = 'Phone',
+            pymts__Fulfillment_Status__c = 'Pending'
         );
         insert txn;
         
-        pymtTest__Transaction_Line_Item__c lineItem = new pymtTest__Transaction_Line_Item__c(
-            pymtTest__Transaction__c = txn.Id,
-            pymtTest__Product__c = product.Id,
-            pymtTest__Quantity__c = 1,
-            pymtTest__Unit_Price__c = 100.00
+        pymts__Transaction_Line_Item__c lineItem = new pymts__Transaction_Line_Item__c(
+            pymts__Transaction__c = txn.Id,
+            pymts__Product__c = product.Id,
+            pymts__Quantity__c = 1,
+            pymts__Unit_Price__c = 100.00
         );
         insert lineItem;
         
@@ -218,13 +218,13 @@ private class OrderFulfillmentQueueableTest {
         Test.stopTest();
         
         // Verify audit log was created
-        List<pymtTest__Audit_Log__c> logs = [
-            SELECT pymtTest__Action__c, pymtTest__Details__c
-            FROM pymtTest__Audit_Log__c
-            WHERE pymtTest__Transaction__c = :txn.Id
+        List<pymts__Audit_Log__c> logs = [
+            SELECT pymts__Action__c, pymts__Details__c
+            FROM pymts__Audit_Log__c
+            WHERE pymts__Transaction__c = :txn.Id
         ];
         System.assertEquals(1, logs.size(), 'Should have audit log');
-        System.assertEquals('Fulfillment Complete', logs[0].pymtTest__Action__c);
+        System.assertEquals('Fulfillment Complete', logs[0].pymts__Action__c);
     }
     
     @isTest
@@ -232,12 +232,12 @@ private class OrderFulfillmentQueueableTest {
         Account acc = [SELECT Id FROM Account LIMIT 1];
         
         // Create transaction without line items to trigger failure
-        pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = acc.Id,
-            pymtTest__Amount__c = 100.00,
-            pymtTest__Status__c = 'Completed',
-            pymtTest__Sales_Channel__c = 'Phone',
-            pymtTest__Fulfillment_Status__c = 'Pending'
+        pymts__Transaction__c txn = new pymts__Transaction__c(
+            pymts__Account__c = acc.Id,
+            pymts__Amount__c = 100.00,
+            pymts__Status__c = 'Completed',
+            pymts__Sales_Channel__c = 'Phone',
+            pymts__Fulfillment_Status__c = 'Pending'
         );
         insert txn;
         
@@ -264,20 +264,20 @@ private class OrderFulfillmentQueueableTest {
         insert newProduct;
         // Don't create pricebook entry for this product
         
-        pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = acc.Id,
-            pymtTest__Amount__c = 100.00,
-            pymtTest__Status__c = 'Completed',
-            pymtTest__Sales_Channel__c = 'Phone',
-            pymtTest__Fulfillment_Status__c = 'Pending'
+        pymts__Transaction__c txn = new pymts__Transaction__c(
+            pymts__Account__c = acc.Id,
+            pymts__Amount__c = 100.00,
+            pymts__Status__c = 'Completed',
+            pymts__Sales_Channel__c = 'Phone',
+            pymts__Fulfillment_Status__c = 'Pending'
         );
         insert txn;
         
-        pymtTest__Transaction_Line_Item__c lineItem = new pymtTest__Transaction_Line_Item__c(
-            pymtTest__Transaction__c = txn.Id,
-            pymtTest__Product__c = newProduct.Id,
-            pymtTest__Quantity__c = 1,
-            pymtTest__Unit_Price__c = 100.00
+        pymts__Transaction_Line_Item__c lineItem = new pymts__Transaction_Line_Item__c(
+            pymts__Transaction__c = txn.Id,
+            pymts__Product__c = newProduct.Id,
+            pymts__Quantity__c = 1,
+            pymts__Unit_Price__c = 100.00
         );
         insert lineItem;
         
@@ -290,7 +290,7 @@ private class OrderFulfillmentQueueableTest {
         System.assertEquals(0, orders.size(), 'Order should be rolled back');
         
         // Verify transaction shows failure
-        pymtTest__Transaction__c result = [SELECT pymtTest__Fulfillment_Status__c FROM pymtTest__Transaction__c WHERE Id = :txn.Id];
-        System.assertEquals('Failed', result.pymtTest__Fulfillment_Status__c);
+        pymts__Transaction__c result = [SELECT pymts__Fulfillment_Status__c FROM pymts__Transaction__c WHERE Id = :txn.Id];
+        System.assertEquals('Failed', result.pymts__Fulfillment_Status__c);
     }
 }

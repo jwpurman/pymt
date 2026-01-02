@@ -64,26 +64,26 @@ public class TransactionSyncBatch implements Database.Batchable<SObject>, Databa
         
         Date achReturnWindow = Date.today().addDays(-60);
         
-        String query = 'SELECT Id, Name, pymtTest__Gateway_Transaction_Id__c, pymtTest__Payment_Gateway__c, ' +
-            'pymtTest__Payment_Gateway__r.pymtTest__Gateway_Type__c, pymtTest__Status__c, ' +
-            'pymtTest__Settlement_Status__c, pymtTest__Payment_Type__c, pymtTest__Amount__c, ' +
-            'pymtTest__Account__c, pymtTest__Last_Sync_Date__c, pymtTest__Expected_Settlement_Date__c, ' +
+        String query = 'SELECT Id, Name, pymts__Gateway_Transaction_Id__c, pymts__Payment_Gateway__c, ' +
+            'pymts__Payment_Gateway__r.pymts__Gateway_Type__c, pymts__Status__c, ' +
+            'pymts__Settlement_Status__c, pymts__Payment_Type__c, pymts__Amount__c, ' +
+            'pymts__Account__c, pymts__Last_Sync_Date__c, pymts__Expected_Settlement_Date__c, ' +
             'CreatedDate ' +
-            'FROM pymtTest__Transaction__c ' +
-            'WHERE pymtTest__Status__c IN (\'Approved\', \'Pending\') ' +
-            'AND pymtTest__Settlement_Status__c IN (\'Pending\', \'Pending Settlement\') ' +
-            'AND pymtTest__Gateway_Transaction_Id__c != null ';
+            'FROM pymts__Transaction__c ' +
+            'WHERE pymts__Status__c IN (\'Approved\', \'Pending\') ' +
+            'AND pymts__Settlement_Status__c IN (\'Pending\', \'Pending Settlement\') ' +
+            'AND pymts__Gateway_Transaction_Id__c != null ';
         
         if (this.specificGatewayId != null) {
-            query += 'AND pymtTest__Payment_Gateway__c = :specificGatewayId ';
+            query += 'AND pymts__Payment_Gateway__c = :specificGatewayId ';
         }
         
         // Include ACH transactions that might still be returned
-        query += 'OR (pymtTest__Payment_Type__c = \'ACH\' ' +
-            'AND pymtTest__Settlement_Status__c = \'Settled\' ' +
+        query += 'OR (pymts__Payment_Type__c = \'ACH\' ' +
+            'AND pymts__Settlement_Status__c = \'Settled\' ' +
             'AND CreatedDate >= :achReturnWindow) ';
         
-        query += 'ORDER BY pymtTest__Payment_Gateway__c, CreatedDate ASC';
+        query += 'ORDER BY pymts__Payment_Gateway__c, CreatedDate ASC';
         
         return Database.getQueryLocator(query);
     }
@@ -92,21 +92,21 @@ public class TransactionSyncBatch implements Database.Batchable<SObject>, Databa
      * @description Process each batch of transactions
      */
     public void execute(Database.BatchableContext bc, List<SObject> scope) {
-        List<pymtTest__Transaction__c> transactions = (List<pymtTest__Transaction__c>) scope;
+        List<pymts__Transaction__c> transactions = (List<pymts__Transaction__c>) scope;
         // Group transactions by gateway for efficient API calls
-        Map<Id, List<pymtTest__Transaction__c>> txnsByGateway = new Map<Id, List<pymtTest__Transaction__c>>();
+        Map<Id, List<pymts__Transaction__c>> txnsByGateway = new Map<Id, List<pymts__Transaction__c>>();
         
-        for (pymtTest__Transaction__c txn : transactions) {
-            if (!txnsByGateway.containsKey(txn.pymtTest__Payment_Gateway__c)) {
-                txnsByGateway.put(txn.pymtTest__Payment_Gateway__c, new List<pymtTest__Transaction__c>());
+        for (pymts__Transaction__c txn : transactions) {
+            if (!txnsByGateway.containsKey(txn.pymts__Payment_Gateway__c)) {
+                txnsByGateway.put(txn.pymts__Payment_Gateway__c, new List<pymts__Transaction__c>());
             }
-            txnsByGateway.get(txn.pymtTest__Payment_Gateway__c).add(txn);
+            txnsByGateway.get(txn.pymts__Payment_Gateway__c).add(txn);
         }
         
         // Process each gateway's transactions
         for (Id gatewayId : txnsByGateway.keySet()) {
-            List<pymtTest__Transaction__c> gatewayTxns = txnsByGateway.get(gatewayId);
-            String gatewayType = gatewayTxns[0].pymtTest__Payment_Gateway__r.pymtTest__Gateway_Type__c;
+            List<pymts__Transaction__c> gatewayTxns = txnsByGateway.get(gatewayId);
+            String gatewayType = gatewayTxns[0].pymts__Payment_Gateway__r.pymts__Gateway_Type__c;
             
             try {
                 syncGatewayTransactions(gatewayId, gatewayType, gatewayTxns);
@@ -120,9 +120,9 @@ public class TransactionSyncBatch implements Database.Batchable<SObject>, Databa
     /**
      * @description Sync transactions for a specific gateway
      */
-    private void syncGatewayTransactions(Id gatewayId, String gatewayType, List<pymtTest__Transaction__c> transactions) {
-        List<pymtTest__Transaction__c> toUpdate = new List<pymtTest__Transaction__c>();
-        List<pymtTest__Audit_Log__c> auditLogs = new List<pymtTest__Audit_Log__c>();
+    private void syncGatewayTransactions(Id gatewayId, String gatewayType, List<pymts__Transaction__c> transactions) {
+        List<pymts__Transaction__c> toUpdate = new List<pymts__Transaction__c>();
+        List<pymts__Audit_Log__c> auditLogs = new List<pymts__Audit_Log__c>();
         
         switch on gatewayType {
             when 'Authorize.Net' {
@@ -151,29 +151,29 @@ public class TransactionSyncBatch implements Database.Batchable<SObject>, Databa
     /**
      * @description Sync transactions with Authorize.Net
      */
-    private void syncAuthorizeNetTransactions(Id gatewayId, List<pymtTest__Transaction__c> transactions,
-                                              List<pymtTest__Transaction__c> toUpdate, 
-                                              List<pymtTest__Audit_Log__c> auditLogs) {
+    private void syncAuthorizeNetTransactions(Id gatewayId, List<pymts__Transaction__c> transactions,
+                                              List<pymts__Transaction__c> toUpdate, 
+                                              List<pymts__Audit_Log__c> auditLogs) {
         AuthorizeNetGateway gateway = new AuthorizeNetGateway(gatewayId);
         
-        for (pymtTest__Transaction__c txn : transactions) {
+        for (pymts__Transaction__c txn : transactions) {
             try {
                 AuthorizeNetGateway.TransactionDetails details = 
-                    gateway.getTransactionDetails(txn.pymtTest__Gateway_Transaction_Id__c);
+                    gateway.getTransactionDetails(txn.pymts__Gateway_Transaction_Id__c);
                 
                 if (details.success) {
                     syncedCount++;
                     
                     // Check for status changes
                     String newSettlementStatus = mapAuthNetSettlementStatus(details);
-                    Boolean statusChanged = newSettlementStatus != txn.pymtTest__Settlement_Status__c;
+                    Boolean statusChanged = newSettlementStatus != txn.pymts__Settlement_Status__c;
                     
                     // Update transaction
-                    txn.pymtTest__Last_Sync_Date__c = DateTime.now();
-                    txn.pymtTest__Settlement_Status__c = newSettlementStatus;
+                    txn.pymts__Last_Sync_Date__c = DateTime.now();
+                    txn.pymts__Settlement_Status__c = newSettlementStatus;
                     
                     if (details.settlementDate != null) {
-                        txn.pymtTest__Settlement_Date__c = details.settlementDate;
+                        txn.pymts__Settlement_Date__c = details.settlementDate;
                     }
                     
                     // Handle ACH returns
@@ -202,16 +202,16 @@ public class TransactionSyncBatch implements Database.Batchable<SObject>, Databa
     /**
      * @description Sync transactions with Stripe
      */
-    private void syncStripeTransactions(Id gatewayId, List<pymtTest__Transaction__c> transactions,
-                                        List<pymtTest__Transaction__c> toUpdate,
-                                        List<pymtTest__Audit_Log__c> auditLogs) {
+    private void syncStripeTransactions(Id gatewayId, List<pymts__Transaction__c> transactions,
+                                        List<pymts__Transaction__c> toUpdate,
+                                        List<pymts__Audit_Log__c> auditLogs) {
         StripeGateway gateway = new StripeGateway(gatewayId);
         
-        for (pymtTest__Transaction__c txn : transactions) {
+        for (pymts__Transaction__c txn : transactions) {
             try {
                 // Stripe PaymentIntents settle quickly for cards
                 // For ACH (via Stripe), check the charge status
-                Map<String, Object> chargeDetails = gateway.getChargeDetails(txn.pymtTest__Gateway_Transaction_Id__c);
+                Map<String, Object> chargeDetails = gateway.getChargeDetails(txn.pymts__Gateway_Transaction_Id__c);
                 
                 if (chargeDetails != null) {
                     syncedCount++;
@@ -219,20 +219,20 @@ public class TransactionSyncBatch implements Database.Batchable<SObject>, Databa
                     String status = (String) chargeDetails.get('status');
                     Boolean captured = (Boolean) chargeDetails.get('captured');
                     
-                    txn.pymtTest__Last_Sync_Date__c = DateTime.now();
+                    txn.pymts__Last_Sync_Date__c = DateTime.now();
                     
                     if (status == 'succeeded' && captured == true) {
-                        if (txn.pymtTest__Settlement_Status__c != 'Settled') {
-                            txn.pymtTest__Settlement_Status__c = 'Settled';
-                            txn.pymtTest__Settlement_Date__c = DateTime.now();
+                        if (txn.pymts__Settlement_Status__c != 'Settled') {
+                            txn.pymts__Settlement_Status__c = 'Settled';
+                            txn.pymts__Settlement_Date__c = DateTime.now();
                             settledCount++;
                             
                             createAuditLog(auditLogs, txn, 'Transaction Settled', 
                                 'Stripe transaction settled successfully');
                         }
                     } else if (status == 'failed') {
-                        txn.pymtTest__Settlement_Status__c = 'Settlement Error';
-                        txn.pymtTest__Status__c = 'Declined';
+                        txn.pymts__Settlement_Status__c = 'Settlement Error';
+                        txn.pymts__Status__c = 'Declined';
                         
                         String failureMessage = (String) chargeDetails.get('failure_message');
                         createAuditLog(auditLogs, txn, 'Settlement Failed', failureMessage);
@@ -277,13 +277,13 @@ public class TransactionSyncBatch implements Database.Batchable<SObject>, Databa
     /**
      * @description Handle ACH return - reverse payment and update records
      */
-    private void handleACHReturn(pymtTest__Transaction__c txn, 
+    private void handleACHReturn(pymts__Transaction__c txn, 
                                  AuthorizeNetGateway.TransactionDetails details,
-                                 List<pymtTest__Audit_Log__c> auditLogs) {
+                                 List<pymts__Audit_Log__c> auditLogs) {
         // Update transaction status
-        txn.pymtTest__Status__c = 'Returned';
-        txn.pymtTest__Settlement_Status__c = 'Returned';
-        txn.pymtTest__Return_Reason_Code__c = details.returnReasonCode;
+        txn.pymts__Status__c = 'Returned';
+        txn.pymts__Settlement_Status__c = 'Returned';
+        txn.pymts__Return_Reason_Code__c = details.returnReasonCode;
         
         // Get return description
         String returnDescription = ACH_RETURN_CODES.containsKey(details.returnReasonCode) ?
@@ -306,10 +306,10 @@ public class TransactionSyncBatch implements Database.Batchable<SObject>, Databa
      */
     private void reverseInvoicePayment(Id transactionId) {
         // Get allocations for this transaction
-        List<pymtTest__Payment_Allocation__c> allocations = [
-            SELECT Id, pymtTest__Invoice__c, pymtTest__Amount__c
-            FROM pymtTest__Payment_Allocation__c
-            WHERE pymtTest__Transaction__c = :transactionId
+        List<pymts__Payment_Allocation__c> allocations = [
+            SELECT Id, pymts__Invoice__c, pymts__Amount__c
+            FROM pymts__Payment_Allocation__c
+            WHERE pymts__Transaction__c = :transactionId
         ];
         
         if (allocations.isEmpty()) return;
@@ -318,36 +318,36 @@ public class TransactionSyncBatch implements Database.Batchable<SObject>, Databa
         Set<Id> invoiceIds = new Set<Id>();
         Map<Id, Decimal> reverseAmounts = new Map<Id, Decimal>();
         
-        for (pymtTest__Payment_Allocation__c alloc : allocations) {
-            invoiceIds.add(alloc.pymtTest__Invoice__c);
-            reverseAmounts.put(alloc.pymtTest__Invoice__c, alloc.pymtTest__Amount__c);
+        for (pymts__Payment_Allocation__c alloc : allocations) {
+            invoiceIds.add(alloc.pymts__Invoice__c);
+            reverseAmounts.put(alloc.pymts__Invoice__c, alloc.pymts__Amount__c);
         }
         
         // Update invoices
-        List<pymtTest__Invoice__c> invoices = [
-            SELECT Id, pymtTest__Amount_Paid__c, pymtTest__Total_Amount__c, pymtTest__Status__c
-            FROM pymtTest__Invoice__c
+        List<pymts__Invoice__c> invoices = [
+            SELECT Id, pymts__Amount_Paid__c, pymts__Total_Amount__c, pymts__Status__c
+            FROM pymts__Invoice__c
             WHERE Id IN :invoiceIds
         ];
         
-        for (pymtTest__Invoice__c inv : invoices) {
+        for (pymts__Invoice__c inv : invoices) {
             Decimal reverseAmount = reverseAmounts.get(inv.Id);
-            inv.pymtTest__Amount_Paid__c = Math.max(0, inv.pymtTest__Amount_Paid__c - reverseAmount);
+            inv.pymts__Amount_Paid__c = Math.max(0, inv.pymts__Amount_Paid__c - reverseAmount);
             
             // Update status
-            if (inv.pymtTest__Amount_Paid__c <= 0) {
-                inv.pymtTest__Status__c = 'Pending';
-            } else if (inv.pymtTest__Amount_Paid__c < inv.pymtTest__Total_Amount__c) {
-                inv.pymtTest__Status__c = 'Partially Paid';
+            if (inv.pymts__Amount_Paid__c <= 0) {
+                inv.pymts__Status__c = 'Pending';
+            } else if (inv.pymts__Amount_Paid__c < inv.pymts__Total_Amount__c) {
+                inv.pymts__Status__c = 'Partially Paid';
             }
         }
         
         update invoices;
         
         // Also reverse any account credits that were created
-        List<pymtTest__Account_Credit__c> credits = [
-            SELECT Id FROM pymtTest__Account_Credit__c
-            WHERE pymtTest__Source_Transaction__c = :transactionId
+        List<pymts__Account_Credit__c> credits = [
+            SELECT Id FROM pymts__Account_Credit__c
+            WHERE pymts__Source_Transaction__c = :transactionId
         ];
         
         if (!credits.isEmpty()) {
@@ -358,7 +358,7 @@ public class TransactionSyncBatch implements Database.Batchable<SObject>, Databa
     /**
      * @description Send notification for ACH return
      */
-    private void sendReturnNotification(pymtTest__Transaction__c txn, String returnCode, String returnDescription) {
+    private void sendReturnNotification(pymts__Transaction__c txn, String returnCode, String returnDescription) {
         // Create bell notification
         try {
             Messaging.CustomNotification notification = new Messaging.CustomNotification();
@@ -369,7 +369,7 @@ public class TransactionSyncBatch implements Database.Batchable<SObject>, Databa
             notification.setTargetId(txn.Id);
             
             // Send to account owner and payment admins
-            Set<String> recipients = getNotificationRecipients(txn.pymtTest__Account__c);
+            Set<String> recipients = getNotificationRecipients(txn.pymts__Account__c);
             if (!recipients.isEmpty()) {
                 notification.send(recipients);
             }
@@ -410,14 +410,14 @@ public class TransactionSyncBatch implements Database.Batchable<SObject>, Databa
         return recipients;
     }
     
-    private void createAuditLog(List<pymtTest__Audit_Log__c> logs, pymtTest__Transaction__c txn, 
+    private void createAuditLog(List<pymts__Audit_Log__c> logs, pymts__Transaction__c txn, 
                                String action, String details) {
-        logs.add(new pymtTest__Audit_Log__c(
-            pymtTest__Action__c = action,
-            pymtTest__Transaction__c = txn.Id,
-            pymtTest__Account__c = txn.pymtTest__Account__c,
-            pymtTest__Details__c = details,
-            pymtTest__Timestamp__c = DateTime.now()
+        logs.add(new pymts__Audit_Log__c(
+            pymts__Action__c = action,
+            pymts__Transaction__c = txn.Id,
+            pymts__Account__c = txn.pymts__Account__c,
+            pymts__Details__c = details,
+            pymts__Timestamp__c = DateTime.now()
         ));
     }
     

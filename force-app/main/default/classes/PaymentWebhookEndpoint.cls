@@ -222,20 +222,20 @@ global with sharing class PaymentWebhookEndpoint {
     private static WebhookResult handleStripePaymentSuccess(Map<String, Object> paymentIntent) {
         String transactionId = (String) paymentIntent.get('id');
         
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
         if (txns.isEmpty()) {
             return new WebhookResult(true, 'Transaction not found: ' + transactionId);
         }
         
-        pymtTest__Transaction__c txn = txns[0];
-        txn.pymtTest__Status__c = 'Approved';
-        txn.pymtTest__Settlement_Status__c = 'Settled';
-        txn.pymtTest__Settlement_Date__c = DateTime.now();
-        txn.pymtTest__Last_Sync_Date__c = DateTime.now();
+        pymts__Transaction__c txn = txns[0];
+        txn.pymts__Status__c = 'Approved';
+        txn.pymts__Settlement_Status__c = 'Settled';
+        txn.pymts__Settlement_Date__c = DateTime.now();
+        txn.pymts__Last_Sync_Date__c = DateTime.now();
         
         update txn;
         
-        createAuditLog(txn.Id, txn.pymtTest__Account__c, 'Webhook: Payment Succeeded', 
+        createAuditLog(txn.Id, txn.pymts__Account__c, 'Webhook: Payment Succeeded', 
             'Payment settled via Stripe webhook');
         
         return new WebhookResult(true, 'Payment success processed');
@@ -245,18 +245,18 @@ global with sharing class PaymentWebhookEndpoint {
         String transactionId = (String) paymentIntent.get('id');
         Map<String, Object> lastError = (Map<String, Object>) paymentIntent.get('last_payment_error');
         
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
         if (txns.isEmpty()) {
             return new WebhookResult(true, 'Transaction not found');
         }
         
-        pymtTest__Transaction__c txn = txns[0];
-        txn.pymtTest__Status__c = 'Declined';
-        txn.pymtTest__Settlement_Status__c = 'Settlement Error';
-        txn.pymtTest__Last_Sync_Date__c = DateTime.now();
+        pymts__Transaction__c txn = txns[0];
+        txn.pymts__Status__c = 'Declined';
+        txn.pymts__Settlement_Status__c = 'Settlement Error';
+        txn.pymts__Last_Sync_Date__c = DateTime.now();
         
         if (lastError != null) {
-            txn.pymtTest__Response_Message__c = (String) lastError.get('message');
+            txn.pymts__Response_Message__c = (String) lastError.get('message');
         }
         
         update txn;
@@ -264,7 +264,7 @@ global with sharing class PaymentWebhookEndpoint {
         // Reverse invoice payment
         reverseInvoicePayment(txn.Id);
         
-        createAuditLog(txn.Id, txn.pymtTest__Account__c, 'Webhook: Payment Failed', 
+        createAuditLog(txn.Id, txn.pymts__Account__c, 'Webhook: Payment Failed', 
             'Payment failed: ' + (lastError != null ? (String) lastError.get('message') : 'Unknown error'));
         
         return new WebhookResult(true, 'Payment failure processed');
@@ -277,7 +277,7 @@ global with sharing class PaymentWebhookEndpoint {
         // Try to find by charge ID or payment intent ID
         String searchId = paymentIntentId != null ? paymentIntentId : chargeId;
         
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(searchId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(searchId);
         if (txns.isEmpty() && paymentIntentId != null) {
             txns = findTransactionsByGatewayId(chargeId);
         }
@@ -286,16 +286,16 @@ global with sharing class PaymentWebhookEndpoint {
             return new WebhookResult(true, 'Transaction not found');
         }
         
-        pymtTest__Transaction__c txn = txns[0];
+        pymts__Transaction__c txn = txns[0];
         
         // Only update if not already settled
-        if (txn.pymtTest__Settlement_Status__c != 'Settled') {
-            txn.pymtTest__Settlement_Status__c = 'Settled';
-            txn.pymtTest__Settlement_Date__c = DateTime.now();
-            txn.pymtTest__Last_Sync_Date__c = DateTime.now();
+        if (txn.pymts__Settlement_Status__c != 'Settled') {
+            txn.pymts__Settlement_Status__c = 'Settled';
+            txn.pymts__Settlement_Date__c = DateTime.now();
+            txn.pymts__Last_Sync_Date__c = DateTime.now();
             update txn;
             
-            createAuditLog(txn.Id, txn.pymtTest__Account__c, 'Webhook: Charge Succeeded', 
+            createAuditLog(txn.Id, txn.pymts__Account__c, 'Webhook: Charge Succeeded', 
                 'Charge settled via webhook');
         }
         
@@ -309,29 +309,29 @@ global with sharing class PaymentWebhookEndpoint {
         String failureCode = (String) charge.get('failure_code');
         
         String searchId = paymentIntentId != null ? paymentIntentId : chargeId;
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(searchId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(searchId);
         
         if (txns.isEmpty()) {
             return new WebhookResult(true, 'Transaction not found');
         }
         
-        pymtTest__Transaction__c txn = txns[0];
-        txn.pymtTest__Status__c = 'Declined';
-        txn.pymtTest__Settlement_Status__c = 'Settlement Error';
-        txn.pymtTest__Response_Message__c = failureMessage;
-        txn.pymtTest__Last_Sync_Date__c = DateTime.now();
+        pymts__Transaction__c txn = txns[0];
+        txn.pymts__Status__c = 'Declined';
+        txn.pymts__Settlement_Status__c = 'Settlement Error';
+        txn.pymts__Response_Message__c = failureMessage;
+        txn.pymts__Last_Sync_Date__c = DateTime.now();
         
         // Check if this is an ACH return
         if (failureCode != null && failureCode.startsWith('bank_account')) {
-            txn.pymtTest__Settlement_Status__c = 'Returned';
-            txn.pymtTest__Return_Reason_Code__c = failureCode;
+            txn.pymts__Settlement_Status__c = 'Returned';
+            txn.pymts__Return_Reason_Code__c = failureCode;
         }
         
         update txn;
         
         reverseInvoicePayment(txn.Id);
         
-        createAuditLog(txn.Id, txn.pymtTest__Account__c, 'Webhook: Charge Failed', 
+        createAuditLog(txn.Id, txn.pymts__Account__c, 'Webhook: Charge Failed', 
             'Charge failed: ' + failureMessage);
         
         return new WebhookResult(true, 'Charge failure processed');
@@ -343,23 +343,23 @@ global with sharing class PaymentWebhookEndpoint {
         Decimal amountRefunded = amountRefundedObj != null ? 
             Decimal.valueOf(String.valueOf(amountRefundedObj)) / 100 : 0;
         
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(chargeId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(chargeId);
         if (txns.isEmpty()) {
             return new WebhookResult(true, 'Transaction not found');
         }
         
-        pymtTest__Transaction__c txn = txns[0];
+        pymts__Transaction__c txn = txns[0];
         
-        if (amountRefunded >= txn.pymtTest__Amount__c) {
-            txn.pymtTest__Status__c = 'Refunded';
+        if (amountRefunded >= txn.pymts__Amount__c) {
+            txn.pymts__Status__c = 'Refunded';
         } else {
-            txn.pymtTest__Status__c = 'Partially Refunded';
+            txn.pymts__Status__c = 'Partially Refunded';
         }
-        txn.pymtTest__Last_Sync_Date__c = DateTime.now();
+        txn.pymts__Last_Sync_Date__c = DateTime.now();
         
         update txn;
         
-        createAuditLog(txn.Id, txn.pymtTest__Account__c, 'Webhook: Charge Refunded', 
+        createAuditLog(txn.Id, txn.pymts__Account__c, 'Webhook: Charge Refunded', 
             'Refund of $' + amountRefunded);
         
         return new WebhookResult(true, 'Refund processed');
@@ -368,17 +368,17 @@ global with sharing class PaymentWebhookEndpoint {
     private static WebhookResult handleStripeDispute(Map<String, Object> dispute, String action) {
         String chargeId = (String) dispute.get('charge');
         
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(chargeId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(chargeId);
         if (txns.isEmpty()) {
             return new WebhookResult(true, 'Transaction not found');
         }
         
-        pymtTest__Transaction__c txn = txns[0];
+        pymts__Transaction__c txn = txns[0];
         
         // Create or update dispute record
-        // Note: Would need pymtTest__Dispute__c object fully implemented
+        // Note: Would need pymts__Dispute__c object fully implemented
         
-        createAuditLog(txn.Id, txn.pymtTest__Account__c, 'Webhook: Dispute ' + action, 
+        createAuditLog(txn.Id, txn.pymts__Account__c, 'Webhook: Dispute ' + action, 
             'Dispute ' + action + ' for charge ' + chargeId);
         
         return new WebhookResult(true, 'Dispute ' + action + ' processed');
@@ -387,17 +387,17 @@ global with sharing class PaymentWebhookEndpoint {
     private static WebhookResult handleStripeACHProcessing(Map<String, Object> paymentIntent) {
         String transactionId = (String) paymentIntent.get('id');
         
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
         if (txns.isEmpty()) {
             return new WebhookResult(true, 'Transaction not found');
         }
         
-        pymtTest__Transaction__c txn = txns[0];
-        txn.pymtTest__Settlement_Status__c = 'Pending Settlement';
-        txn.pymtTest__Last_Sync_Date__c = DateTime.now();
+        pymts__Transaction__c txn = txns[0];
+        txn.pymts__Settlement_Status__c = 'Pending Settlement';
+        txn.pymts__Last_Sync_Date__c = DateTime.now();
         
         // Set expected settlement date (3-5 business days)
-        txn.pymtTest__Expected_Settlement_Date__c = calculateExpectedSettlement(Date.today());
+        txn.pymts__Expected_Settlement_Date__c = calculateExpectedSettlement(Date.today());
         
         update txn;
         
@@ -420,15 +420,15 @@ global with sharing class PaymentWebhookEndpoint {
     private static WebhookResult handleAuthNetPaymentCreated(Map<String, Object> payload) {
         String transactionId = String.valueOf(payload.get('id'));
         
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
         if (txns.isEmpty()) {
             return new WebhookResult(true, 'Transaction not found');
         }
         
-        pymtTest__Transaction__c txn = txns[0];
-        txn.pymtTest__Status__c = 'Approved';
-        txn.pymtTest__Settlement_Status__c = 'Pending Settlement';
-        txn.pymtTest__Last_Sync_Date__c = DateTime.now();
+        pymts__Transaction__c txn = txns[0];
+        txn.pymts__Status__c = 'Approved';
+        txn.pymts__Settlement_Status__c = 'Pending Settlement';
+        txn.pymts__Last_Sync_Date__c = DateTime.now();
         
         update txn;
         
@@ -438,19 +438,19 @@ global with sharing class PaymentWebhookEndpoint {
     private static WebhookResult handleAuthNetCaptureCreated(Map<String, Object> payload) {
         String transactionId = String.valueOf(payload.get('id'));
         
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
         if (txns.isEmpty()) {
             return new WebhookResult(true, 'Transaction not found');
         }
         
-        pymtTest__Transaction__c txn = txns[0];
-        txn.pymtTest__Settlement_Status__c = 'Settled';
-        txn.pymtTest__Settlement_Date__c = DateTime.now();
-        txn.pymtTest__Last_Sync_Date__c = DateTime.now();
+        pymts__Transaction__c txn = txns[0];
+        txn.pymts__Settlement_Status__c = 'Settled';
+        txn.pymts__Settlement_Date__c = DateTime.now();
+        txn.pymts__Last_Sync_Date__c = DateTime.now();
         
         update txn;
         
-        createAuditLog(txn.Id, txn.pymtTest__Account__c, 'Webhook: Capture Created', 
+        createAuditLog(txn.Id, txn.pymts__Account__c, 'Webhook: Capture Created', 
             'Transaction captured/settled');
         
         return new WebhookResult(true, 'Capture processed');
@@ -468,12 +468,12 @@ global with sharing class PaymentWebhookEndpoint {
     private static WebhookResult handleAuthNetVoidCreated(Map<String, Object> payload) {
         String transactionId = String.valueOf(payload.get('id'));
         
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
         if (!txns.isEmpty()) {
-            pymtTest__Transaction__c txn = txns[0];
-            txn.pymtTest__Status__c = 'Voided';
-            txn.pymtTest__Settlement_Status__c = 'Voided';
-            txn.pymtTest__Last_Sync_Date__c = DateTime.now();
+            pymts__Transaction__c txn = txns[0];
+            txn.pymts__Status__c = 'Voided';
+            txn.pymts__Settlement_Status__c = 'Voided';
+            txn.pymts__Last_Sync_Date__c = DateTime.now();
             update txn;
             
             reverseInvoicePayment(txn.Id);
@@ -496,11 +496,11 @@ global with sharing class PaymentWebhookEndpoint {
     private static WebhookResult handleAuthNetFraudDeclined(Map<String, Object> payload) {
         String transactionId = String.valueOf(payload.get('id'));
         
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
         if (!txns.isEmpty()) {
-            pymtTest__Transaction__c txn = txns[0];
-            txn.pymtTest__Status__c = 'Declined';
-            txn.pymtTest__Response_Message__c = 'Declined due to fraud detection';
+            pymts__Transaction__c txn = txns[0];
+            txn.pymts__Status__c = 'Declined';
+            txn.pymts__Response_Message__c = 'Declined due to fraud detection';
             update txn;
             
             reverseInvoicePayment(txn.Id);
@@ -514,25 +514,25 @@ global with sharing class PaymentWebhookEndpoint {
         String transactionId = (String) data.get('x_trans_id');
         String responseCode = (String) data.get('x_response_code');
         
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
         if (txns.isEmpty()) {
             return new WebhookResult(true, 'Transaction not found');
         }
         
-        pymtTest__Transaction__c txn = txns[0];
+        pymts__Transaction__c txn = txns[0];
         
         // Response codes: 1=Approved, 2=Declined, 3=Error, 4=Held for Review
         if (responseCode == '1') {
-            txn.pymtTest__Status__c = 'Approved';
+            txn.pymts__Status__c = 'Approved';
         } else if (responseCode == '2') {
-            txn.pymtTest__Status__c = 'Declined';
+            txn.pymts__Status__c = 'Declined';
             reverseInvoicePayment(txn.Id);
         } else if (responseCode == '3') {
-            txn.pymtTest__Status__c = 'Error';
+            txn.pymts__Status__c = 'Error';
             reverseInvoicePayment(txn.Id);
         }
         
-        txn.pymtTest__Last_Sync_Date__c = DateTime.now();
+        txn.pymts__Last_Sync_Date__c = DateTime.now();
         update txn;
         
         return new WebhookResult(true, 'Silent post processed');
@@ -548,23 +548,23 @@ global with sharing class PaymentWebhookEndpoint {
         
         String transactionId = (String) txnData.get('id');
         
-        List<pymtTest__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
+        List<pymts__Transaction__c> txns = findTransactionsByGatewayId(transactionId);
         if (txns.isEmpty()) {
             return new WebhookResult(true, 'Transaction not found');
         }
         
-        pymtTest__Transaction__c txn = txns[0];
+        pymts__Transaction__c txn = txns[0];
         
         if (status == 'settled' || status == 'disbursed') {
-            txn.pymtTest__Settlement_Status__c = 'Settled';
-            txn.pymtTest__Settlement_Date__c = DateTime.now();
+            txn.pymts__Settlement_Status__c = 'Settled';
+            txn.pymts__Settlement_Date__c = DateTime.now();
         } else if (status == 'declined') {
-            txn.pymtTest__Settlement_Status__c = 'Settlement Error';
-            txn.pymtTest__Status__c = 'Declined';
+            txn.pymts__Settlement_Status__c = 'Settlement Error';
+            txn.pymts__Status__c = 'Declined';
             reverseInvoicePayment(txn.Id);
         }
         
-        txn.pymtTest__Last_Sync_Date__c = DateTime.now();
+        txn.pymts__Last_Sync_Date__c = DateTime.now();
         update txn;
         
         return new WebhookResult(true, 'Settlement ' + status + ' processed');
@@ -592,12 +592,12 @@ global with sharing class PaymentWebhookEndpoint {
         return true;
     }
     
-    private static List<pymtTest__Transaction__c> findTransactionsByGatewayId(String gatewayTxnId) {
+    private static List<pymts__Transaction__c> findTransactionsByGatewayId(String gatewayTxnId) {
         return [
-            SELECT Id, Name, pymtTest__Status__c, pymtTest__Settlement_Status__c, 
-                   pymtTest__Amount__c, pymtTest__Account__c, pymtTest__Payment_Type__c
-            FROM pymtTest__Transaction__c
-            WHERE pymtTest__Gateway_Transaction_Id__c = :gatewayTxnId
+            SELECT Id, Name, pymts__Status__c, pymts__Settlement_Status__c, 
+                   pymts__Amount__c, pymts__Account__c, pymts__Payment_Type__c
+            FROM pymts__Transaction__c
+            WHERE pymts__Gateway_Transaction_Id__c = :gatewayTxnId
             LIMIT 1
         ];
     }
@@ -619,10 +619,10 @@ global with sharing class PaymentWebhookEndpoint {
     }
     
     private static void reverseInvoicePayment(Id transactionId) {
-        List<pymtTest__Payment_Allocation__c> allocations = [
-            SELECT Id, pymtTest__Invoice__c, pymtTest__Amount__c
-            FROM pymtTest__Payment_Allocation__c
-            WHERE pymtTest__Transaction__c = :transactionId
+        List<pymts__Payment_Allocation__c> allocations = [
+            SELECT Id, pymts__Invoice__c, pymts__Amount__c
+            FROM pymts__Payment_Allocation__c
+            WHERE pymts__Transaction__c = :transactionId
         ];
         
         if (allocations.isEmpty()) return;
@@ -630,25 +630,25 @@ global with sharing class PaymentWebhookEndpoint {
         Set<Id> invoiceIds = new Set<Id>();
         Map<Id, Decimal> reverseAmounts = new Map<Id, Decimal>();
         
-        for (pymtTest__Payment_Allocation__c alloc : allocations) {
-            invoiceIds.add(alloc.pymtTest__Invoice__c);
-            reverseAmounts.put(alloc.pymtTest__Invoice__c, alloc.pymtTest__Amount__c);
+        for (pymts__Payment_Allocation__c alloc : allocations) {
+            invoiceIds.add(alloc.pymts__Invoice__c);
+            reverseAmounts.put(alloc.pymts__Invoice__c, alloc.pymts__Amount__c);
         }
         
-        List<pymtTest__Invoice__c> invoices = [
-            SELECT Id, pymtTest__Amount_Paid__c, pymtTest__Total_Amount__c, pymtTest__Status__c
-            FROM pymtTest__Invoice__c
+        List<pymts__Invoice__c> invoices = [
+            SELECT Id, pymts__Amount_Paid__c, pymts__Total_Amount__c, pymts__Status__c
+            FROM pymts__Invoice__c
             WHERE Id IN :invoiceIds
         ];
         
-        for (pymtTest__Invoice__c inv : invoices) {
+        for (pymts__Invoice__c inv : invoices) {
             Decimal reverseAmount = reverseAmounts.get(inv.Id);
-            inv.pymtTest__Amount_Paid__c = Math.max(0, inv.pymtTest__Amount_Paid__c - reverseAmount);
+            inv.pymts__Amount_Paid__c = Math.max(0, inv.pymts__Amount_Paid__c - reverseAmount);
             
-            if (inv.pymtTest__Amount_Paid__c <= 0) {
-                inv.pymtTest__Status__c = 'Pending';
-            } else if (inv.pymtTest__Amount_Paid__c < inv.pymtTest__Total_Amount__c) {
-                inv.pymtTest__Status__c = 'Partially Paid';
+            if (inv.pymts__Amount_Paid__c <= 0) {
+                inv.pymts__Status__c = 'Pending';
+            } else if (inv.pymts__Amount_Paid__c < inv.pymts__Total_Amount__c) {
+                inv.pymts__Status__c = 'Partially Paid';
             }
         }
         
@@ -656,12 +656,12 @@ global with sharing class PaymentWebhookEndpoint {
     }
     
     private static void createAuditLog(Id transactionId, Id accountId, String action, String details) {
-        pymtTest__Audit_Log__c log = new pymtTest__Audit_Log__c(
-            pymtTest__Transaction__c = transactionId,
-            pymtTest__Account__c = accountId,
-            pymtTest__Action__c = action,
-            pymtTest__Details__c = details,
-            pymtTest__Timestamp__c = DateTime.now()
+        pymts__Audit_Log__c log = new pymts__Audit_Log__c(
+            pymts__Transaction__c = transactionId,
+            pymts__Account__c = accountId,
+            pymts__Action__c = action,
+            pymts__Details__c = details,
+            pymts__Timestamp__c = DateTime.now()
         );
         insert log;
     }

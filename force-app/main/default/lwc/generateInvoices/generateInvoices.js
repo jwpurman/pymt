@@ -52,12 +52,12 @@ export default class GenerateInvoices extends NavigationMixin(LightningElement) 
         },
         { 
             label: 'Amount', 
-            fieldName: 'pymtTest__Total_Amount__c', 
+            fieldName: 'pymts__Total_Amount__c', 
             type: 'currency',
             typeAttributes: { currencyCode: 'USD' }
         },
-        { label: 'Due Date', fieldName: 'pymtTest__Due_Date__c', type: 'date' },
-        { label: 'Status', fieldName: 'pymtTest__Status__c', type: 'text' }
+        { label: 'Due Date', fieldName: 'pymts__Due_Date__c', type: 'date' },
+        { label: 'Status', fieldName: 'pymts__Status__c', type: 'text' }
     ];
     
     connectedCallback() {
@@ -83,7 +83,7 @@ export default class GenerateInvoices extends NavigationMixin(LightningElement) 
                 this.orderData.OrderItems = this.orderData.OrderItems.map(item => ({
                     ...item,
                     productName: item.Product2?.Name || 'Unknown Product',
-                    isRecurring: item.Product2?.pymtTest__Is_Recurring__c || false
+                    isRecurring: item.Product2?.pymts__Is_Recurring__c || false
                 }));
             }
             
@@ -94,7 +94,7 @@ export default class GenerateInvoices extends NavigationMixin(LightningElement) 
             }));
             
             // Set default gateway
-            const defaultGateway = gatewaysResult.find(gw => gw.pymtTest__Is_Default__c);
+            const defaultGateway = gatewaysResult.find(gw => gw.pymts__Is_Default__c);
             if (defaultGateway) {
                 this.selectedGateway = defaultGateway.Id;
             } else if (gatewaysResult.length > 0) {
@@ -172,10 +172,10 @@ export default class GenerateInvoices extends NavigationMixin(LightningElement) 
             this.generatedInvoices = invoiceIds.map((id, index) => ({
                 Id: id,
                 Name: `INV-${String(index + 1).padStart(5, '0')}`,
-                invoiceUrl: `/lightning/r/pymtTest__Invoice__c/${id}/view`,
-                pymtTest__Total_Amount__c: this.invoicePreview?.invoices[index]?.amount || 0,
-                pymtTest__Due_Date__c: this.invoicePreview?.invoices[index]?.date,
-                pymtTest__Status__c: this.enableAutoPay ? 'Scheduled' : 'Pending'
+                invoiceUrl: `/lightning/r/pymts__Invoice__c/${id}/view`,
+                pymts__Total_Amount__c: this.invoicePreview?.invoices[index]?.amount || 0,
+                pymts__Due_Date__c: this.invoicePreview?.invoices[index]?.date,
+                pymts__Status__c: this.enableAutoPay ? 'Scheduled' : 'Pending'
             }));
             
             this.showToast('Success', `${invoiceIds.length} invoice(s) generated successfully`, 'success');
@@ -195,7 +195,7 @@ export default class GenerateInvoices extends NavigationMixin(LightningElement) 
             attributes: {
                 recordId: this.orderData.AccountId,
                 objectApiName: 'Account',
-                relationshipApiName: 'pymtTest__Invoices__r',
+                relationshipApiName: 'pymts__Invoices__r',
                 actionName: 'view'
             }
         });

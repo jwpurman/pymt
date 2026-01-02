@@ -172,7 +172,7 @@ export default class InvoicePayment extends NavigationMixin(LightningElement) {
                 type: 'standard__recordPage',
                 attributes: {
                     recordId: this.paymentResult.transactionId,
-                    objectApiName: 'pymtTest__Transaction__c',
+                    objectApiName: 'pymts__Transaction__c',
                     actionName: 'view'
                 }
             });

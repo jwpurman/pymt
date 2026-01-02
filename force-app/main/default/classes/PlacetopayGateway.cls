@@ -21,7 +21,7 @@ public class PlacetopayGateway extends PaymentGatewayBase {
         loadCredentials();
     }
     
-    public PlacetopayGateway(pymtTest__Payment_Gateway__c gateway) {
+    public PlacetopayGateway(pymts__Payment_Gateway__c gateway) {
         super(gateway);
         loadCredentials();
     }
@@ -32,14 +32,14 @@ public class PlacetopayGateway extends PaymentGatewayBase {
     private void loadCredentials() {
         String metadataName = this.isTestMode ? 'Placetopay_Test' : 'Placetopay_Live';
         try {
-            pymtTest__Gateway_Credential__mdt cred = [
-                SELECT pymtTest__API_Login_Id__c, pymtTest__Transaction_Key__c
-                FROM pymtTest__Gateway_Credential__mdt
+            pymts__Gateway_Credential__mdt cred = [
+                SELECT pymts__API_Login_Id__c, pymts__Transaction_Key__c
+                FROM pymts__Gateway_Credential__mdt
                 WHERE DeveloperName = :metadataName
                 LIMIT 1
             ];
-            this.login = cred.pymtTest__API_Login_Id__c;
-            this.tranKey = cred.pymtTest__Transaction_Key__c;
+            this.login = cred.pymts__API_Login_Id__c;
+            this.tranKey = cred.pymts__Transaction_Key__c;
         } catch (Exception e) {
             this.login = '';
             this.tranKey = '';

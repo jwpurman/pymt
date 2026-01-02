@@ -6,20 +6,20 @@ private class StripeGatewayTest {
     
     @TestSetup
     static void setupTestData() {
-        pymtTest__Payment_Gateway__c gateway = new pymtTest__Payment_Gateway__c(
+        pymts__Payment_Gateway__c gateway = new pymts__Payment_Gateway__c(
             Name = 'Test Stripe',
-            pymtTest__Gateway_Type__c = 'Stripe',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = true,
-            pymtTest__Environment__c = 'Test',
-            pymtTest__Public_Key__c = 'pk_test_12345'
+            pymts__Gateway_Type__c = 'Stripe',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = true,
+            pymts__Environment__c = 'Test',
+            pymts__Public_Key__c = 'pk_test_12345'
         );
         insert gateway;
     }
     
     @isTest
     static void testGetGatewayType() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         
         Test.startTest();
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
@@ -31,7 +31,7 @@ private class StripeGatewayTest {
     
     @isTest
     static void testGetClientLibraryUrl() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         
         Test.startTest();
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
@@ -43,7 +43,7 @@ private class StripeGatewayTest {
     
     @isTest
     static void testSaleSuccess() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
         
         PaymentRequest request = new PaymentRequest();
@@ -65,7 +65,7 @@ private class StripeGatewayTest {
     
     @isTest
     static void testSaleDeclined() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
         
         PaymentRequest request = new PaymentRequest();
@@ -85,7 +85,7 @@ private class StripeGatewayTest {
     
     @isTest
     static void testAuthorize() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
         
         PaymentRequest request = new PaymentRequest();
@@ -105,7 +105,7 @@ private class StripeGatewayTest {
     
     @isTest
     static void testCapture() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new StripeCaptureMock());
@@ -119,7 +119,7 @@ private class StripeGatewayTest {
     
     @isTest
     static void testRefundFull() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new StripeRefundMock());
@@ -133,7 +133,7 @@ private class StripeGatewayTest {
     
     @isTest
     static void testRefundPartial() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new StripeRefundMock());
@@ -147,7 +147,7 @@ private class StripeGatewayTest {
     
     @isTest
     static void testVoidTransaction() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new StripeVoidMock());
@@ -161,7 +161,7 @@ private class StripeGatewayTest {
     
     @isTest
     static void testCreateCustomer() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
         
         CustomerRequest request = new CustomerRequest();
@@ -181,7 +181,7 @@ private class StripeGatewayTest {
     
     @isTest
     static void testAttachPaymentMethod() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new StripeAttachPaymentMethodMock());
@@ -195,7 +195,7 @@ private class StripeGatewayTest {
     
     @isTest
     static void testGetChargeDetails() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new StripeChargeDetailsMock());
@@ -210,7 +210,7 @@ private class StripeGatewayTest {
     
     @isTest
     static void testCreateToken() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         StripeGateway stripeGateway = new StripeGateway(gateway.Id);
         
         TokenRequest request = new TokenRequest();

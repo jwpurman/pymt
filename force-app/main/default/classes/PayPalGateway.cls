@@ -6,7 +6,7 @@ public class PayPalGateway extends PaymentGatewayBase {
     private static final String CLIENT_LIBRARY_URL = 'https://www.paypal.com/sdk/js';
     
     public PayPalGateway(Id gatewayId) { super(gatewayId); }
-    public PayPalGateway(pymtTest__Payment_Gateway__c gateway) { super(gateway); }
+    public PayPalGateway(pymts__Payment_Gateway__c gateway) { super(gateway); }
     
     public override String getGatewayType() { return 'PayPal'; }
     protected override String getApiBaseUrl() { return this.isTestMode ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com'; }

@@ -25,25 +25,25 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
         Integer maxRetries = getMaxRetryAttempts();
         
         return Database.getQueryLocator([
-            SELECT Id, Name, pymtTest__Account__c, pymtTest__Total_Amount__c, pymtTest__Balance_Due__c,
-                   pymtTest__Due_Date__c, pymtTest__Scheduled_Payment_Date__c, pymtTest__Auto_Pay__c,
-                   pymtTest__Payment_Gateway__c, pymtTest__Retry_Count__c, pymtTest__Status__c,
-                   pymtTest__Account__r.Name
-            FROM pymtTest__Invoice__c
-            WHERE pymtTest__Auto_Pay__c = true
-            AND pymtTest__Status__c IN ('Scheduled', 'Pending', 'Failed')
-            AND pymtTest__Balance_Due__c > 0
-            AND pymtTest__Scheduled_Payment_Date__c <= :processingDate
-            AND pymtTest__Retry_Count__c < :maxRetries
-            ORDER BY pymtTest__Scheduled_Payment_Date__c ASC
+            SELECT Id, Name, pymts__Account__c, pymts__Total_Amount__c, pymts__Balance_Due__c,
+                   pymts__Due_Date__c, pymts__Scheduled_Payment_Date__c, pymts__Auto_Pay__c,
+                   pymts__Payment_Gateway__c, pymts__Retry_Count__c, pymts__Status__c,
+                   pymts__Account__r.Name
+            FROM pymts__Invoice__c
+            WHERE pymts__Auto_Pay__c = true
+            AND pymts__Status__c IN ('Scheduled', 'Pending', 'Failed')
+            AND pymts__Balance_Due__c > 0
+            AND pymts__Scheduled_Payment_Date__c <= :processingDate
+            AND pymts__Retry_Count__c < :maxRetries
+            ORDER BY pymts__Scheduled_Payment_Date__c ASC
         ]);
     }
     
     /**
      * @description Process each batch of invoices
      */
-    public void execute(Database.BatchableContext bc, List<pymtTest__Invoice__c> invoices) {
-        for (pymtTest__Invoice__c invoice : invoices) {
+    public void execute(Database.BatchableContext bc, List<pymts__Invoice__c> invoices) {
+        for (pymts__Invoice__c invoice : invoices) {
             try {
                 processInvoicePayment(invoice);
             } catch (Exception e) {
@@ -55,9 +55,9 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
     /**
      * @description Process payment for a single invoice
      */
-    private void processInvoicePayment(pymtTest__Invoice__c invoice) {
+    private void processInvoicePayment(pymts__Invoice__c invoice) {
         // Get primary payment method for the account
-        pymtTest__Payment_Method__c paymentMethod = getPrimaryPaymentMethod(invoice.pymtTest__Account__c);
+        pymts__Payment_Method__c paymentMethod = getPrimaryPaymentMethod(invoice.pymts__Account__c);
         
         if (paymentMethod == null) {
             handleNoPaymentMethod(invoice);
@@ -65,30 +65,30 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
         }
         
         // Check if payment method is expired
-        if (paymentMethod.pymtTest__Is_Expired__c) {
+        if (paymentMethod.pymts__Is_Expired__c) {
             handleExpiredPaymentMethod(invoice, paymentMethod);
             return;
         }
         
         // Determine which gateway to use (invoice gateway or payment method gateway)
-        Id gatewayId = invoice.pymtTest__Payment_Gateway__c != null ? 
-                       invoice.pymtTest__Payment_Gateway__c : 
-                       paymentMethod.pymtTest__Payment_Gateway__c;
+        Id gatewayId = invoice.pymts__Payment_Gateway__c != null ? 
+                       invoice.pymts__Payment_Gateway__c : 
+                       paymentMethod.pymts__Payment_Gateway__c;
         
         // Build payment data
         PaymentService.PaymentData paymentData = new PaymentService.PaymentData();
-        paymentData.amount = invoice.pymtTest__Balance_Due__c;
+        paymentData.amount = invoice.pymts__Balance_Due__c;
         paymentData.currencyCode = 'USD';
-        paymentData.accountId = invoice.pymtTest__Account__c;
+        paymentData.accountId = invoice.pymts__Account__c;
         paymentData.gatewayId = gatewayId;
         paymentData.paymentMethodId = paymentMethod.Id;
-        paymentData.paymentMethodToken = paymentMethod.pymtTest__Gateway_Token__c;
+        paymentData.paymentMethodToken = paymentMethod.pymts__Gateway_Token__c;
         paymentData.idempotencyKey = 'AUTO-' + invoice.Id + '-' + String.valueOf(Date.today());
         
         // Set up allocation for full payment
         PaymentService.InvoiceAllocation allocation = new PaymentService.InvoiceAllocation();
         allocation.invoiceId = invoice.Id;
-        allocation.amount = invoice.pymtTest__Balance_Due__c;
+        allocation.amount = invoice.pymts__Balance_Due__c;
         allocation.isFullPayment = true;
         paymentData.invoiceAllocations = new List<PaymentService.InvoiceAllocation>{ allocation };
         
@@ -105,15 +105,15 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
     /**
      * @description Get primary payment method for account
      */
-    private pymtTest__Payment_Method__c getPrimaryPaymentMethod(Id accountId) {
-        List<pymtTest__Payment_Method__c> methods = [
-            SELECT Id, pymtTest__Gateway_Token__c, pymtTest__Payment_Gateway__c,
-                   pymtTest__Is_Expired__c, pymtTest__Card_Brand__c, pymtTest__Last_Four__c
-            FROM pymtTest__Payment_Method__c
-            WHERE pymtTest__Account__c = :accountId
-            AND pymtTest__Active__c = true
-            AND pymtTest__Is_Expired__c = false
-            ORDER BY pymtTest__Is_Primary__c DESC, CreatedDate DESC
+    private pymts__Payment_Method__c getPrimaryPaymentMethod(Id accountId) {
+        List<pymts__Payment_Method__c> methods = [
+            SELECT Id, pymts__Gateway_Token__c, pymts__Payment_Gateway__c,
+                   pymts__Is_Expired__c, pymts__Card_Brand__c, pymts__Last_Four__c
+            FROM pymts__Payment_Method__c
+            WHERE pymts__Account__c = :accountId
+            AND pymts__Active__c = true
+            AND pymts__Is_Expired__c = false
+            ORDER BY pymts__Is_Primary__c DESC, CreatedDate DESC
             LIMIT 1
         ];
         
@@ -123,11 +123,11 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
     /**
      * @description Handle successful payment
      */
-    private void handlePaymentSuccess(pymtTest__Invoice__c invoice, PaymentService.PaymentResult result) {
+    private void handlePaymentSuccess(pymts__Invoice__c invoice, PaymentService.PaymentResult result) {
         successCount++;
         
         // Reset retry count
-        invoice.pymtTest__Retry_Count__c = 0;
+        invoice.pymts__Retry_Count__c = 0;
         update invoice;
         
         // Create retry log entry for success
@@ -140,18 +140,18 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
     /**
      * @description Handle payment failure
      */
-    private void handlePaymentFailure(pymtTest__Invoice__c invoice, String errorMessage) {
+    private void handlePaymentFailure(pymts__Invoice__c invoice, String errorMessage) {
         failureCount++;
         errorMessages.add(invoice.Name + ': ' + errorMessage);
         
         // Increment retry count
-        invoice.pymtTest__Retry_Count__c = (invoice.pymtTest__Retry_Count__c == null ? 0 : invoice.pymtTest__Retry_Count__c) + 1;
-        invoice.pymtTest__Status__c = 'Failed';
+        invoice.pymts__Retry_Count__c = (invoice.pymts__Retry_Count__c == null ? 0 : invoice.pymts__Retry_Count__c) + 1;
+        invoice.pymts__Status__c = 'Failed';
         
         // Schedule next retry if under max attempts
         Integer maxRetries = getMaxRetryAttempts();
-        if (invoice.pymtTest__Retry_Count__c < maxRetries) {
-            invoice.pymtTest__Scheduled_Payment_Date__c = getNextRetryDate(invoice.pymtTest__Retry_Count__c.intValue());
+        if (invoice.pymts__Retry_Count__c < maxRetries) {
+            invoice.pymts__Scheduled_Payment_Date__c = getNextRetryDate(invoice.pymts__Retry_Count__c.intValue());
         }
         
         update invoice;
@@ -166,12 +166,12 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
     /**
      * @description Handle payment error (exception)
      */
-    private void handlePaymentError(pymtTest__Invoice__c invoice, String errorMessage) {
+    private void handlePaymentError(pymts__Invoice__c invoice, String errorMessage) {
         failureCount++;
         errorMessages.add(invoice.Name + ': System error - ' + errorMessage);
         
-        invoice.pymtTest__Retry_Count__c = (invoice.pymtTest__Retry_Count__c == null ? 0 : invoice.pymtTest__Retry_Count__c) + 1;
-        invoice.pymtTest__Status__c = 'Failed';
+        invoice.pymts__Retry_Count__c = (invoice.pymts__Retry_Count__c == null ? 0 : invoice.pymts__Retry_Count__c) + 1;
+        invoice.pymts__Status__c = 'Failed';
         update invoice;
         
         createRetryLog(invoice.Id, 'Error', errorMessage, null);
@@ -180,12 +180,12 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
     /**
      * @description Handle no payment method on file
      */
-    private void handleNoPaymentMethod(pymtTest__Invoice__c invoice) {
+    private void handleNoPaymentMethod(pymts__Invoice__c invoice) {
         failureCount++;
         String message = 'No active payment method on file';
         errorMessages.add(invoice.Name + ': ' + message);
         
-        invoice.pymtTest__Status__c = 'Failed';
+        invoice.pymts__Status__c = 'Failed';
         update invoice;
         
         createRetryLog(invoice.Id, 'Failed', message, null);
@@ -195,12 +195,12 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
     /**
      * @description Handle expired payment method
      */
-    private void handleExpiredPaymentMethod(pymtTest__Invoice__c invoice, pymtTest__Payment_Method__c pm) {
+    private void handleExpiredPaymentMethod(pymts__Invoice__c invoice, pymts__Payment_Method__c pm) {
         failureCount++;
-        String message = 'Payment method expired (' + pm.pymtTest__Card_Brand__c + ' ****' + pm.pymtTest__Last_Four__c + ')';
+        String message = 'Payment method expired (' + pm.pymts__Card_Brand__c + ' ****' + pm.pymts__Last_Four__c + ')';
         errorMessages.add(invoice.Name + ': ' + message);
         
-        invoice.pymtTest__Status__c = 'Failed';
+        invoice.pymts__Status__c = 'Failed';
         update invoice;
         
         createRetryLog(invoice.Id, 'Failed', message, null);
@@ -211,12 +211,12 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
      * @description Create a retry log entry
      */
     private void createRetryLog(Id invoiceId, String status, String message, Id transactionId) {
-        pymtTest__Retry_Log__c log = new pymtTest__Retry_Log__c(
-            pymtTest__Invoice__c = invoiceId,
-            pymtTest__Status__c = status,
-            pymtTest__Message__c = message,
-            pymtTest__Transaction__c = transactionId,
-            pymtTest__Attempt_Date__c = DateTime.now()
+        pymts__Retry_Log__c log = new pymts__Retry_Log__c(
+            pymts__Invoice__c = invoiceId,
+            pymts__Status__c = status,
+            pymts__Message__c = message,
+            pymts__Transaction__c = transactionId,
+            pymts__Attempt_Date__c = DateTime.now()
         );
         insert log;
     }
@@ -224,7 +224,7 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
     /**
      * @description Send payment notification
      */
-    private void sendPaymentNotification(pymtTest__Invoice__c invoice, String notificationType, String message) {
+    private void sendPaymentNotification(pymts__Invoice__c invoice, String notificationType, String message) {
         // Create bell notification
         Set<String> recipientIds = getNotificationRecipients(invoice);
         
@@ -243,7 +243,7 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
         }
     }
     
-    private Set<String> getNotificationRecipients(pymtTest__Invoice__c invoice) {
+    private Set<String> getNotificationRecipients(pymts__Invoice__c invoice) {
         // Get account owner and payment admin users
         Set<String> recipients = new Set<String>();
         
@@ -263,7 +263,7 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
         return titles.containsKey(type) ? titles.get(type) : 'Payment Update';
     }
     
-    private String getNotificationBody(pymtTest__Invoice__c invoice, String type, String message) {
+    private String getNotificationBody(pymts__Invoice__c invoice, String type, String message) {
         if (type == 'SUCCESS') {
             return 'Payment for ' + invoice.Name + ' was processed successfully.';
         }
@@ -293,9 +293,9 @@ public class RecurringPaymentBatch implements Database.Batchable<SObject>, Datab
      */
     private Integer getMaxRetryAttempts() {
         // Default to 3, can be overridden by custom setting
-        pymtTest__Payment_Settings__c settings = pymtTest__Payment_Settings__c.getOrgDefaults();
-        return settings != null && settings.pymtTest__Max_Retry_Attempts__c != null ? 
-               settings.pymtTest__Max_Retry_Attempts__c.intValue() : 3;
+        pymts__Payment_Settings__c settings = pymts__Payment_Settings__c.getOrgDefaults();
+        return settings != null && settings.pymts__Max_Retry_Attempts__c != null ? 
+               settings.pymts__Max_Retry_Attempts__c.intValue() : 3;
     }
     
     /**

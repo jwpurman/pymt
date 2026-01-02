@@ -25,9 +25,9 @@
                     
                     <div class="details">
                         <p><strong>Transaction Number:</strong> {!relatedTo.Name}</p>
-                        <p><strong>Amount:</strong> <span class="amount">${!relatedTo.pymtTest__Amount__c}</span></p>
+                        <p><strong>Amount:</strong> <span class="amount">${!relatedTo.pymts__Amount__c}</span></p>
                         <p><strong>Date:</strong> {!relatedTo.CreatedDate}</p>
-                        <p><strong>Status:</strong> {!relatedTo.pymtTest__Status__c}</p>
+                        <p><strong>Status:</strong> {!relatedTo.pymts__Status__c}</p>
                     </div>
                     
                     <p>If you have any questions about this transaction, please don't hesitate to contact us.</p>
@@ -51,9 +51,9 @@ Your payment has been successfully processed.
 Transaction Details:
 -------------------
 Transaction Number: {!relatedTo.Name}
-Amount: ${!relatedTo.pymtTest__Amount__c}
+Amount: ${!relatedTo.pymts__Amount__c}
 Date: {!relatedTo.CreatedDate}
-Status: {!relatedTo.pymtTest__Status__c}
+Status: {!relatedTo.pymts__Status__c}
 
 If you have any questions about this transaction, please don't hesitate to contact us.
 

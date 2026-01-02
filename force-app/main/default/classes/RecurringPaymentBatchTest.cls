@@ -11,82 +11,82 @@ private class RecurringPaymentBatchTest {
         insert testAccount;
         
         // Create gateway
-        pymtTest__Payment_Gateway__c gateway = new pymtTest__Payment_Gateway__c(
+        pymts__Payment_Gateway__c gateway = new pymts__Payment_Gateway__c(
             Name = 'Test Gateway',
-            pymtTest__Gateway_Type__c = 'Stripe',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = true,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Stripe',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = true,
+            pymts__Environment__c = 'Test'
         );
         insert gateway;
         
         // Create payment method
-        pymtTest__Payment_Method__c paymentMethod = new pymtTest__Payment_Method__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Payment_Gateway__c = gateway.Id,
-            pymtTest__Type__c = 'Credit Card',
-            pymtTest__Card_Brand__c = 'Visa',
-            pymtTest__Last_Four__c = '4242',
-            pymtTest__Expiration_Month__c = 12,
-            pymtTest__Expiration_Year__c = Date.today().year() + 2,
-            pymtTest__Gateway_Token__c = 'pm_test_12345',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Primary__c = true
+        pymts__Payment_Method__c paymentMethod = new pymts__Payment_Method__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Payment_Gateway__c = gateway.Id,
+            pymts__Type__c = 'Credit Card',
+            pymts__Card_Brand__c = 'Visa',
+            pymts__Last_Four__c = '4242',
+            pymts__Expiration_Month__c = 12,
+            pymts__Expiration_Year__c = Date.today().year() + 2,
+            pymts__Gateway_Token__c = 'pm_test_12345',
+            pymts__Active__c = true,
+            pymts__Is_Primary__c = true
         );
         insert paymentMethod;
         
         // Create auto-pay invoices scheduled for today
-        List<pymtTest__Invoice__c> invoices = new List<pymtTest__Invoice__c>();
+        List<pymts__Invoice__c> invoices = new List<pymts__Invoice__c>();
         
         // Invoice 1: Due today, auto-pay enabled
-        invoices.add(new pymtTest__Invoice__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Total_Amount__c = 100.00,
-            pymtTest__Amount_Paid__c = 0,
-            pymtTest__Status__c = 'Scheduled',
-            pymtTest__Due_Date__c = Date.today(),
-            pymtTest__Scheduled_Payment_Date__c = Date.today(),
-            pymtTest__Payment_Gateway__c = gateway.Id,
-            pymtTest__Auto_Pay__c = true,
-            pymtTest__Retry_Count__c = 0
+        invoices.add(new pymts__Invoice__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Total_Amount__c = 100.00,
+            pymts__Amount_Paid__c = 0,
+            pymts__Status__c = 'Scheduled',
+            pymts__Due_Date__c = Date.today(),
+            pymts__Scheduled_Payment_Date__c = Date.today(),
+            pymts__Payment_Gateway__c = gateway.Id,
+            pymts__Auto_Pay__c = true,
+            pymts__Retry_Count__c = 0
         ));
         
         // Invoice 2: Scheduled for today
-        invoices.add(new pymtTest__Invoice__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Total_Amount__c = 200.00,
-            pymtTest__Amount_Paid__c = 0,
-            pymtTest__Status__c = 'Scheduled',
-            pymtTest__Due_Date__c = Date.today(),
-            pymtTest__Scheduled_Payment_Date__c = Date.today(),
-            pymtTest__Payment_Gateway__c = gateway.Id,
-            pymtTest__Auto_Pay__c = true,
-            pymtTest__Retry_Count__c = 0
+        invoices.add(new pymts__Invoice__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Total_Amount__c = 200.00,
+            pymts__Amount_Paid__c = 0,
+            pymts__Status__c = 'Scheduled',
+            pymts__Due_Date__c = Date.today(),
+            pymts__Scheduled_Payment_Date__c = Date.today(),
+            pymts__Payment_Gateway__c = gateway.Id,
+            pymts__Auto_Pay__c = true,
+            pymts__Retry_Count__c = 0
         ));
         
         // Invoice 3: Scheduled for future (should not be processed)
-        invoices.add(new pymtTest__Invoice__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Total_Amount__c = 150.00,
-            pymtTest__Amount_Paid__c = 0,
-            pymtTest__Status__c = 'Scheduled',
-            pymtTest__Due_Date__c = Date.today().addDays(7),
-            pymtTest__Scheduled_Payment_Date__c = Date.today().addDays(7),
-            pymtTest__Payment_Gateway__c = gateway.Id,
-            pymtTest__Auto_Pay__c = true,
-            pymtTest__Retry_Count__c = 0
+        invoices.add(new pymts__Invoice__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Total_Amount__c = 150.00,
+            pymts__Amount_Paid__c = 0,
+            pymts__Status__c = 'Scheduled',
+            pymts__Due_Date__c = Date.today().addDays(7),
+            pymts__Scheduled_Payment_Date__c = Date.today().addDays(7),
+            pymts__Payment_Gateway__c = gateway.Id,
+            pymts__Auto_Pay__c = true,
+            pymts__Retry_Count__c = 0
         ));
         
         insert invoices;
         
         // Create line items
-        List<pymtTest__Invoice_Line_Item__c> lineItems = new List<pymtTest__Invoice_Line_Item__c>();
-        for (pymtTest__Invoice__c inv : invoices) {
-            lineItems.add(new pymtTest__Invoice_Line_Item__c(
-                pymtTest__Invoice__c = inv.Id,
-                pymtTest__Description__c = 'Monthly Service',
-                pymtTest__Quantity__c = 1,
-                pymtTest__Unit_Price__c = inv.pymtTest__Total_Amount__c
+        List<pymts__Invoice_Line_Item__c> lineItems = new List<pymts__Invoice_Line_Item__c>();
+        for (pymts__Invoice__c inv : invoices) {
+            lineItems.add(new pymts__Invoice_Line_Item__c(
+                pymts__Invoice__c = inv.Id,
+                pymts__Description__c = 'Monthly Service',
+                pymts__Quantity__c = 1,
+                pymts__Unit_Price__c = inv.pymts__Total_Amount__c
             ));
         }
         insert lineItems;
@@ -102,26 +102,26 @@ private class RecurringPaymentBatchTest {
         Test.stopTest();
         
         // Verify invoices were paid
-        List<pymtTest__Invoice__c> paidInvoices = [
-            SELECT pymtTest__Status__c, pymtTest__Amount_Paid__c
-            FROM pymtTest__Invoice__c
-            WHERE pymtTest__Scheduled_Payment_Date__c = TODAY
+        List<pymts__Invoice__c> paidInvoices = [
+            SELECT pymts__Status__c, pymts__Amount_Paid__c
+            FROM pymts__Invoice__c
+            WHERE pymts__Scheduled_Payment_Date__c = TODAY
         ];
         
-        for (pymtTest__Invoice__c inv : paidInvoices) {
-            System.assertEquals('Paid', inv.pymtTest__Status__c, 'Invoice should be paid');
+        for (pymts__Invoice__c inv : paidInvoices) {
+            System.assertEquals('Paid', inv.pymts__Status__c, 'Invoice should be paid');
         }
         
         // Verify transactions were created
-        List<pymtTest__Transaction__c> txns = [
-            SELECT pymtTest__Amount__c, pymtTest__Status__c
-            FROM pymtTest__Transaction__c
+        List<pymts__Transaction__c> txns = [
+            SELECT pymts__Amount__c, pymts__Status__c
+            FROM pymts__Transaction__c
         ];
         
         System.assertEquals(2, txns.size(), 'Should create 2 transactions');
         
-        for (pymtTest__Transaction__c txn : txns) {
-            System.assertEquals('Approved', txn.pymtTest__Status__c, 'Transaction should be approved');
+        for (pymts__Transaction__c txn : txns) {
+            System.assertEquals('Approved', txn.pymts__Status__c, 'Transaction should be approved');
         }
     }
     
@@ -135,37 +135,37 @@ private class RecurringPaymentBatchTest {
         Test.stopTest();
         
         // Verify retry count was incremented
-        List<pymtTest__Invoice__c> invoices = [
-            SELECT pymtTest__Status__c, pymtTest__Retry_Count__c
-            FROM pymtTest__Invoice__c
-            WHERE pymtTest__Scheduled_Payment_Date__c = TODAY
+        List<pymts__Invoice__c> invoices = [
+            SELECT pymts__Status__c, pymts__Retry_Count__c
+            FROM pymts__Invoice__c
+            WHERE pymts__Scheduled_Payment_Date__c = TODAY
         ];
         
-        for (pymtTest__Invoice__c inv : invoices) {
-            System.assertEquals(1, inv.pymtTest__Retry_Count__c, 'Retry count should be incremented');
+        for (pymts__Invoice__c inv : invoices) {
+            System.assertEquals(1, inv.pymts__Retry_Count__c, 'Retry count should be incremented');
         }
         
         // Verify retry logs were created
-        List<pymtTest__Retry_Log__c> logs = [
-            SELECT pymtTest__Status__c, pymtTest__Message__c
-            FROM pymtTest__Retry_Log__c
+        List<pymts__Retry_Log__c> logs = [
+            SELECT pymts__Status__c, pymts__Message__c
+            FROM pymts__Retry_Log__c
         ];
         
         System.assertEquals(2, logs.size(), 'Should create 2 retry logs');
         
-        for (pymtTest__Retry_Log__c log : logs) {
-            System.assertEquals('Failed', log.pymtTest__Status__c, 'Log status should be Failed');
+        for (pymts__Retry_Log__c log : logs) {
+            System.assertEquals('Failed', log.pymts__Status__c, 'Log status should be Failed');
         }
     }
     
     @isTest
     static void testBatchSkipsMaxRetries() {
         // Update invoice to max retries
-        pymtTest__Invoice__c invoice = [
-            SELECT Id FROM pymtTest__Invoice__c 
-            WHERE pymtTest__Total_Amount__c = 100.00
+        pymts__Invoice__c invoice = [
+            SELECT Id FROM pymts__Invoice__c 
+            WHERE pymts__Total_Amount__c = 100.00
         ];
-        invoice.pymtTest__Retry_Count__c = 3; // Default max
+        invoice.pymts__Retry_Count__c = 3; // Default max
         update invoice;
         
         Test.setMock(HttpCalloutMock.class, new PaymentSuccessMock());
@@ -176,21 +176,21 @@ private class RecurringPaymentBatchTest {
         Test.stopTest();
         
         // Verify max retry invoice was not processed (no new transaction)
-        List<pymtTest__Transaction__c> txns = [
-            SELECT pymtTest__Amount__c FROM pymtTest__Transaction__c
+        List<pymts__Transaction__c> txns = [
+            SELECT pymts__Amount__c FROM pymts__Transaction__c
         ];
         
         // Only 1 transaction for the other invoice
         System.assertEquals(1, txns.size(), 'Should only process 1 invoice');
-        System.assertEquals(200.00, txns[0].pymtTest__Amount__c, 'Should process the 200 invoice');
+        System.assertEquals(200.00, txns[0].pymts__Amount__c, 'Should process the 200 invoice');
     }
     
     @isTest
     static void testBatchSkipsExpiredCard() {
         // Update payment method to be expired
-        pymtTest__Payment_Method__c pm = [SELECT Id FROM pymtTest__Payment_Method__c LIMIT 1];
-        pm.pymtTest__Expiration_Month__c = 1;
-        pm.pymtTest__Expiration_Year__c = Date.today().year() - 1;
+        pymts__Payment_Method__c pm = [SELECT Id FROM pymts__Payment_Method__c LIMIT 1];
+        pm.pymts__Expiration_Month__c = 1;
+        pm.pymts__Expiration_Year__c = Date.today().year() - 1;
         update pm;
         
         Test.setMock(HttpCalloutMock.class, new PaymentSuccessMock());
@@ -201,15 +201,15 @@ private class RecurringPaymentBatchTest {
         Test.stopTest();
         
         // Verify no transactions were created (card expired)
-        List<pymtTest__Transaction__c> txns = [SELECT Id FROM pymtTest__Transaction__c];
+        List<pymts__Transaction__c> txns = [SELECT Id FROM pymts__Transaction__c];
         System.assertEquals(0, txns.size(), 'Should not process with expired card');
     }
     
     @isTest
     static void testBatchSkipsNoPrimaryPaymentMethod() {
         // Remove primary flag
-        pymtTest__Payment_Method__c pm = [SELECT Id FROM pymtTest__Payment_Method__c LIMIT 1];
-        pm.pymtTest__Is_Primary__c = false;
+        pymts__Payment_Method__c pm = [SELECT Id FROM pymts__Payment_Method__c LIMIT 1];
+        pm.pymts__Is_Primary__c = false;
         update pm;
         
         Test.setMock(HttpCalloutMock.class, new PaymentSuccessMock());
@@ -220,7 +220,7 @@ private class RecurringPaymentBatchTest {
         Test.stopTest();
         
         // Verify no transactions were created
-        List<pymtTest__Transaction__c> txns = [SELECT Id FROM pymtTest__Transaction__c];
+        List<pymts__Transaction__c> txns = [SELECT Id FROM pymts__Transaction__c];
         System.assertEquals(0, txns.size(), 'Should not process without primary payment method');
     }
     
@@ -276,10 +276,10 @@ private class RecurringPaymentBatchTest {
     @isTest
     static void testExponentialBackoff() {
         // First failure - should schedule for tomorrow
-        pymtTest__Invoice__c invoice = [
-            SELECT Id, pymtTest__Retry_Count__c, pymtTest__Scheduled_Payment_Date__c
-            FROM pymtTest__Invoice__c 
-            WHERE pymtTest__Total_Amount__c = 100.00
+        pymts__Invoice__c invoice = [
+            SELECT Id, pymts__Retry_Count__c, pymts__Scheduled_Payment_Date__c
+            FROM pymts__Invoice__c 
+            WHERE pymts__Total_Amount__c = 100.00
         ];
         
         Test.setMock(HttpCalloutMock.class, new PaymentFailedMock());
@@ -291,14 +291,14 @@ private class RecurringPaymentBatchTest {
         
         // After first failure, check retry date
         invoice = [
-            SELECT pymtTest__Retry_Count__c, pymtTest__Scheduled_Payment_Date__c
-            FROM pymtTest__Invoice__c 
+            SELECT pymts__Retry_Count__c, pymts__Scheduled_Payment_Date__c
+            FROM pymts__Invoice__c 
             WHERE Id = :invoice.Id
         ];
         
-        System.assertEquals(1, invoice.pymtTest__Retry_Count__c, 'Retry count should be 1');
+        System.assertEquals(1, invoice.pymts__Retry_Count__c, 'Retry count should be 1');
         // Next retry should be 1 day later (2^0 = 1)
-        System.assertEquals(Date.today().addDays(1), invoice.pymtTest__Scheduled_Payment_Date__c, 
+        System.assertEquals(Date.today().addDays(1), invoice.pymts__Scheduled_Payment_Date__c, 
             'Next retry should be tomorrow');
     }
     

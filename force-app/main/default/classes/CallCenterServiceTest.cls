@@ -29,27 +29,27 @@ private class CallCenterServiceTest {
         insert pbes;
         
         // Create payment gateway
-        pymtTest__Payment_Gateway__c gateway = new pymtTest__Payment_Gateway__c(
+        pymts__Payment_Gateway__c gateway = new pymts__Payment_Gateway__c(
             Name = 'Test Stripe Gateway',
-            pymtTest__Gateway_Type__c = 'Stripe',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = true,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Stripe',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = true,
+            pymts__Environment__c = 'Test'
         );
         insert gateway;
         
         // Create payment method for one account
-        pymtTest__Payment_Method__c pm = new pymtTest__Payment_Method__c(
-            pymtTest__Account__c = accounts[0].Id,
-            pymtTest__Type__c = 'Credit Card',
-            pymtTest__Card_Brand__c = 'Visa',
-            pymtTest__Last_Four__c = '4242',
-            pymtTest__Expiration_Month__c = 12,
-            pymtTest__Expiration_Year__c = Date.today().addYears(2).year(),
-            pymtTest__Gateway_Token__c = 'tok_test_12345',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Primary__c = true,
-            pymtTest__Payment_Gateway__c = gateway.Id
+        pymts__Payment_Method__c pm = new pymts__Payment_Method__c(
+            pymts__Account__c = accounts[0].Id,
+            pymts__Type__c = 'Credit Card',
+            pymts__Card_Brand__c = 'Visa',
+            pymts__Last_Four__c = '4242',
+            pymts__Expiration_Month__c = 12,
+            pymts__Expiration_Year__c = Date.today().addYears(2).year(),
+            pymts__Gateway_Token__c = 'tok_test_12345',
+            pymts__Active__c = true,
+            pymts__Is_Primary__c = true,
+            pymts__Payment_Gateway__c = gateway.Id
         );
         insert pm;
     }
@@ -83,7 +83,7 @@ private class CallCenterServiceTest {
     static void testSearchAccounts_IncludesPaymentMethods() {
         List<Account> results = CallCenterService.searchAccounts('Test Customer One');
         System.assertEquals(1, results.size());
-        System.assertEquals(1, results[0].pymtTest__Payment_Methods__r.size(), 'Should include payment methods');
+        System.assertEquals(1, results[0].pymts__Payment_Methods__r.size(), 'Should include payment methods');
     }
     
     @isTest
@@ -129,22 +129,22 @@ private class CallCenterServiceTest {
     @isTest
     static void testGetPaymentMethods() {
         Account acc = [SELECT Id FROM Account WHERE Name = 'Test Customer One'];
-        List<pymtTest__Payment_Method__c> methods = CallCenterService.getPaymentMethods(acc.Id);
+        List<pymts__Payment_Method__c> methods = CallCenterService.getPaymentMethods(acc.Id);
         System.assertEquals(1, methods.size(), 'Should find one payment method');
-        System.assertEquals('4242', methods[0].pymtTest__Last_Four__c);
+        System.assertEquals('4242', methods[0].pymts__Last_Four__c);
     }
     
     @isTest
     static void testGetPaymentMethods_NoMethods() {
         Account acc = [SELECT Id FROM Account WHERE Name = 'Test Customer Two'];
-        List<pymtTest__Payment_Method__c> methods = CallCenterService.getPaymentMethods(acc.Id);
+        List<pymts__Payment_Method__c> methods = CallCenterService.getPaymentMethods(acc.Id);
         System.assertEquals(0, methods.size(), 'Should return empty for account without methods');
     }
     
     @isTest
     static void testProcessCallCenterPayment_WithSavedMethod() {
         Account acc = [SELECT Id FROM Account WHERE Name = 'Test Customer One'];
-        pymtTest__Payment_Method__c pm = [SELECT Id FROM pymtTest__Payment_Method__c WHERE pymtTest__Account__c = :acc.Id];
+        pymts__Payment_Method__c pm = [SELECT Id FROM pymts__Payment_Method__c WHERE pymts__Account__c = :acc.Id];
         Product2 product = [SELECT Id FROM Product2 WHERE ProductCode = 'WGT-PRO'];
         
         CallCenterService.CartItem item = new CallCenterService.CartItem();
@@ -171,25 +171,25 @@ private class CallCenterServiceTest {
         System.assertEquals(199.98, result.amount, 'Amount should match cart total');
         
         // Verify transaction was created
-        pymtTest__Transaction__c txn = [SELECT pymtTest__Sales_Channel__c, pymtTest__Fulfillment_Status__c 
-                                    FROM pymtTest__Transaction__c WHERE Id = :result.transactionId];
-        System.assertEquals('Phone', txn.pymtTest__Sales_Channel__c, 'Sales channel should be Phone');
-        System.assertEquals('Pending', txn.pymtTest__Fulfillment_Status__c, 'Fulfillment should be Pending');
+        pymts__Transaction__c txn = [SELECT pymts__Sales_Channel__c, pymts__Fulfillment_Status__c 
+                                    FROM pymts__Transaction__c WHERE Id = :result.transactionId];
+        System.assertEquals('Phone', txn.pymts__Sales_Channel__c, 'Sales channel should be Phone');
+        System.assertEquals('Pending', txn.pymts__Fulfillment_Status__c, 'Fulfillment should be Pending');
         
         // Verify line items were created
-        List<pymtTest__Transaction_Line_Item__c> lineItems = [
-            SELECT pymtTest__Product__c, pymtTest__Quantity__c, pymtTest__Unit_Price__c
-            FROM pymtTest__Transaction_Line_Item__c
-            WHERE pymtTest__Transaction__c = :result.transactionId
+        List<pymts__Transaction_Line_Item__c> lineItems = [
+            SELECT pymts__Product__c, pymts__Quantity__c, pymts__Unit_Price__c
+            FROM pymts__Transaction_Line_Item__c
+            WHERE pymts__Transaction__c = :result.transactionId
         ];
         System.assertEquals(1, lineItems.size(), 'Should have one line item');
-        System.assertEquals(2, lineItems[0].pymtTest__Quantity__c, 'Quantity should be 2');
+        System.assertEquals(2, lineItems[0].pymts__Quantity__c, 'Quantity should be 2');
     }
     
     @isTest
     static void testProcessCallCenterPayment_MultipleItems() {
         Account acc = [SELECT Id FROM Account WHERE Name = 'Test Customer One'];
-        pymtTest__Payment_Method__c pm = [SELECT Id FROM pymtTest__Payment_Method__c WHERE pymtTest__Account__c = :acc.Id];
+        pymts__Payment_Method__c pm = [SELECT Id FROM pymts__Payment_Method__c WHERE pymts__Account__c = :acc.Id];
         List<Product2> products = [SELECT Id, Name FROM Product2 ORDER BY Name];
         
         List<CallCenterService.CartItem> items = new List<CallCenterService.CartItem>();
@@ -222,7 +222,7 @@ private class CallCenterServiceTest {
         System.assertEquals(349.96, result.amount);
         
         // Verify multiple line items
-        Integer lineItemCount = [SELECT COUNT() FROM pymtTest__Transaction_Line_Item__c WHERE pymtTest__Transaction__c = :result.transactionId];
+        Integer lineItemCount = [SELECT COUNT() FROM pymts__Transaction_Line_Item__c WHERE pymts__Transaction__c = :result.transactionId];
         System.assertEquals(2, lineItemCount, 'Should have two line items');
     }
     

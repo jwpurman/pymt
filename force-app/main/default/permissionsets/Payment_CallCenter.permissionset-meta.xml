@@ -43,7 +43,7 @@
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
-        <object>pymtTest__Transaction__c</object>
+        <object>pymts__Transaction__c</object>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>
         <allowEdit>false</allowEdit>
@@ -52,7 +52,7 @@
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
-        <object>pymtTest__Transaction_Line_Item__c</object>
+        <object>pymts__Transaction_Line_Item__c</object>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>
         <allowEdit>false</allowEdit>
@@ -61,7 +61,7 @@
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
-        <object>pymtTest__Payment_Method__c</object>
+        <object>pymts__Payment_Method__c</object>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>
         <allowEdit>false</allowEdit>
@@ -70,7 +70,7 @@
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
-        <object>pymtTest__Invoice__c</object>
+        <object>pymts__Invoice__c</object>
         <allowCreate>false</allowCreate>
         <allowDelete>false</allowDelete>
         <allowEdit>false</allowEdit>
@@ -79,7 +79,7 @@
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
-        <object>pymtTest__Payment_Gateway__c</object>
+        <object>pymts__Payment_Gateway__c</object>
         <allowCreate>false</allowCreate>
         <allowDelete>false</allowDelete>
         <allowEdit>false</allowEdit>
@@ -88,58 +88,58 @@
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     
-    <!-- Field Permissions for pymtTest__Transaction__c -->
+    <!-- Field Permissions for pymts__Transaction__c -->
     <fieldPermissions>
-        <field>pymtTest__Transaction__c.pymtTest__Account__c</field>
+        <field>pymts__Transaction__c.pymts__Account__c</field>
         <editable>true</editable>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <field>pymtTest__Transaction__c.pymtTest__Sales_Channel__c</field>
+        <field>pymts__Transaction__c.pymts__Sales_Channel__c</field>
         <editable>true</editable>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <field>pymtTest__Transaction__c.pymtTest__Fulfillment_Status__c</field>
+        <field>pymts__Transaction__c.pymts__Fulfillment_Status__c</field>
         <editable>false</editable>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <field>pymtTest__Transaction__c.pymtTest__Source_Description__c</field>
+        <field>pymts__Transaction__c.pymts__Source_Description__c</field>
         <editable>true</editable>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <field>pymtTest__Transaction__c.pymtTest__Order__c</field>
+        <field>pymts__Transaction__c.pymts__Order__c</field>
         <editable>false</editable>
         <readable>true</readable>
     </fieldPermissions>
     
-    <!-- Field Permissions for pymtTest__Transaction_Line_Item__c -->
+    <!-- Field Permissions for pymts__Transaction_Line_Item__c -->
     <fieldPermissions>
-        <field>pymtTest__Transaction_Line_Item__c.pymtTest__Product__c</field>
+        <field>pymts__Transaction_Line_Item__c.pymts__Product__c</field>
         <editable>true</editable>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <field>pymtTest__Transaction_Line_Item__c.pymtTest__Total_Price__c</field>
+        <field>pymts__Transaction_Line_Item__c.pymts__Total_Price__c</field>
         <editable>false</editable>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <field>pymtTest__Transaction_Line_Item__c.pymtTest__Description__c</field>
+        <field>pymts__Transaction_Line_Item__c.pymts__Description__c</field>
         <editable>true</editable>
         <readable>true</readable>
     </fieldPermissions>
     
-    <!-- Field Permissions for pymtTest__Payment_Method__c -->
+    <!-- Field Permissions for pymts__Payment_Method__c -->
     <fieldPermissions>
-        <field>pymtTest__Payment_Method__c.pymtTest__Last_Four__c</field>
+        <field>pymts__Payment_Method__c.pymts__Last_Four__c</field>
         <editable>true</editable>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <field>pymtTest__Payment_Method__c.pymtTest__Gateway_Token__c</field>
+        <field>pymts__Payment_Method__c.pymts__Gateway_Token__c</field>
         <editable>true</editable>
         <readable>true</readable>
     </fieldPermissions>

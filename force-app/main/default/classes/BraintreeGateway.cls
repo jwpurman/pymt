@@ -6,7 +6,7 @@ public class BraintreeGateway extends PaymentGatewayBase {
     private static final String CLIENT_LIBRARY_URL = 'https://js.braintreegateway.com/web/dropin/1.33.0/js/dropin.min.js';
     
     public BraintreeGateway(Id gatewayId) { super(gatewayId); }
-    public BraintreeGateway(pymtTest__Payment_Gateway__c gateway) { super(gateway); }
+    public BraintreeGateway(pymts__Payment_Gateway__c gateway) { super(gateway); }
     
     public override String getGatewayType() { return 'Braintree'; }
     protected override String getApiBaseUrl() { return this.isTestMode ? 'https://api.sandbox.braintreegateway.com' : 'https://api.braintreegateway.com'; }

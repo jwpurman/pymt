@@ -20,10 +20,10 @@ public class GatewayFactory {
         }
         
         // Query the gateway configuration
-        pymtTest__Payment_Gateway__c gatewayConfig = [
-            SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c,
-                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c
-            FROM pymtTest__Payment_Gateway__c
+        pymts__Payment_Gateway__c gatewayConfig = [
+            SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c,
+                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c
+            FROM pymts__Payment_Gateway__c
             WHERE Id = :gatewayId
             LIMIT 1
         ];
@@ -39,7 +39,7 @@ public class GatewayFactory {
      * @param gatewayConfig The Payment Gateway record
      * @return PaymentGateway The gateway instance
      */
-    public static PaymentGateway getGateway(pymtTest__Payment_Gateway__c gatewayConfig) {
+    public static PaymentGateway getGateway(pymts__Payment_Gateway__c gatewayConfig) {
         // Check cache first
         if (gatewayCache.containsKey(gatewayConfig.Id)) {
             return gatewayCache.get(gatewayConfig.Id);
@@ -56,11 +56,11 @@ public class GatewayFactory {
      * @return PaymentGateway The default gateway instance
      */
     public static PaymentGateway getDefaultGateway() {
-        pymtTest__Payment_Gateway__c defaultGateway = [
-            SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c,
-                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c
-            FROM pymtTest__Payment_Gateway__c
-            WHERE pymtTest__Is_Default__c = true AND pymtTest__Active__c = true
+        pymts__Payment_Gateway__c defaultGateway = [
+            SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c,
+                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c
+            FROM pymts__Payment_Gateway__c
+            WHERE pymts__Is_Default__c = true AND pymts__Active__c = true
             LIMIT 1
         ];
         
@@ -76,12 +76,12 @@ public class GatewayFactory {
      * @param gatewayConfig The gateway configuration
      * @return PaymentGateway The gateway instance
      */
-    private static PaymentGateway createGatewayInstance(pymtTest__Payment_Gateway__c gatewayConfig) {
-        if (!gatewayConfig.pymtTest__Active__c) {
+    private static PaymentGateway createGatewayInstance(pymts__Payment_Gateway__c gatewayConfig) {
+        if (!gatewayConfig.pymts__Active__c) {
             throw new GatewayFactoryException('Gateway is not active: ' + gatewayConfig.Name);
         }
         
-        String gatewayType = gatewayConfig.pymtTest__Gateway_Type__c;
+        String gatewayType = gatewayConfig.pymts__Gateway_Type__c;
         
         switch on gatewayType {
             when 'Stripe' {
@@ -110,15 +110,15 @@ public class GatewayFactory {
     
     /**
      * @description Get all active gateways
-     * @return List<pymtTest__Payment_Gateway__c> List of active gateway records
+     * @return List<pymts__Payment_Gateway__c> List of active gateway records
      */
-    public static List<pymtTest__Payment_Gateway__c> getActiveGateways() {
+    public static List<pymts__Payment_Gateway__c> getActiveGateways() {
         return [
-            SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c,
-                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c
-            FROM pymtTest__Payment_Gateway__c
-            WHERE pymtTest__Active__c = true
-            ORDER BY pymtTest__Is_Default__c DESC, Name ASC
+            SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c,
+                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c
+            FROM pymts__Payment_Gateway__c
+            WHERE pymts__Active__c = true
+            ORDER BY pymts__Is_Default__c DESC, Name ASC
         ];
     }
     

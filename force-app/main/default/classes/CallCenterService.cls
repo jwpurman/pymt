@@ -66,11 +66,11 @@ public with sharing class CallCenterService {
         
         return [
             SELECT Id, Name, Phone, BillingCity, BillingState,
-                   (SELECT Id, pymtTest__Type__c, pymtTest__Last_Four__c, pymtTest__Expiration_Month__c,
-                           pymtTest__Expiration_Year__c, pymtTest__Is_Primary__c, pymtTest__Active__c
+                   (SELECT Id, pymts__Type__c, pymts__Last_Four__c, pymts__Expiration_Month__c,
+                           pymts__Expiration_Year__c, pymts__Is_Primary__c, pymts__Active__c
                     FROM Payment_Methods__r
-                    WHERE pymtTest__Active__c = true
-                    ORDER BY pymtTest__Is_Primary__c DESC, CreatedDate DESC)
+                    WHERE pymts__Active__c = true
+                    ORDER BY pymts__Is_Primary__c DESC, CreatedDate DESC)
             FROM Account
             WHERE Name LIKE :searchPattern
                OR Phone LIKE :searchPattern
@@ -154,19 +154,19 @@ public with sharing class CallCenterService {
      * @return List of active payment methods
      */
     @AuraEnabled(cacheable=true)
-    public static List<pymtTest__Payment_Method__c> getPaymentMethods(String accountId) {
+    public static List<pymts__Payment_Method__c> getPaymentMethods(String accountId) {
         if (String.isBlank(accountId)) {
-            return new List<pymtTest__Payment_Method__c>();
+            return new List<pymts__Payment_Method__c>();
         }
         
         return [
-            SELECT Id, Name, pymtTest__Type__c, pymtTest__Last_Four__c, pymtTest__Expiration_Month__c,
-                   pymtTest__Expiration_Year__c, pymtTest__Is_Primary__c, pymtTest__Card_Brand__c,
-                   pymtTest__Active__c, pymtTest__Payment_Gateway__c, pymtTest__Gateway_Token__c
-            FROM pymtTest__Payment_Method__c
-            WHERE pymtTest__Account__c = :accountId
-              AND pymtTest__Active__c = true
-            ORDER BY pymtTest__Is_Primary__c DESC, CreatedDate DESC
+            SELECT Id, Name, pymts__Type__c, pymts__Last_Four__c, pymts__Expiration_Month__c,
+                   pymts__Expiration_Year__c, pymts__Is_Primary__c, pymts__Card_Brand__c,
+                   pymts__Active__c, pymts__Payment_Gateway__c, pymts__Gateway_Token__c
+            FROM pymts__Payment_Method__c
+            WHERE pymts__Account__c = :accountId
+              AND pymts__Active__c = true
+            ORDER BY pymts__Is_Primary__c DESC, CreatedDate DESC
         ];
     }
     
@@ -190,11 +190,11 @@ public with sharing class CallCenterService {
             }
             
             // Get or create payment method
-            pymtTest__Payment_Method__c paymentMethod;
+            pymts__Payment_Method__c paymentMethod;
             if (String.isNotBlank(request.paymentMethodId)) {
                 paymentMethod = [
-                    SELECT Id, pymtTest__Gateway_Token__c, pymtTest__Payment_Gateway__c, pymtTest__Type__c
-                    FROM pymtTest__Payment_Method__c
+                    SELECT Id, pymts__Gateway_Token__c, pymts__Payment_Gateway__c, pymts__Type__c
+                    FROM pymts__Payment_Method__c
                     WHERE Id = :request.paymentMethodId
                 ];
             } else if (String.isNotBlank(request.paymentToken)) {
@@ -207,13 +207,13 @@ public with sharing class CallCenterService {
             // Get gateway
             String gatewayId = request.gatewayId;
             if (String.isBlank(gatewayId) && paymentMethod != null) {
-                gatewayId = paymentMethod.pymtTest__Payment_Gateway__c;
+                gatewayId = paymentMethod.pymts__Payment_Gateway__c;
             }
             if (String.isBlank(gatewayId)) {
-                pymtTest__Payment_Gateway__c defaultGateway = [
+                pymts__Payment_Gateway__c defaultGateway = [
                     SELECT Id
-                    FROM pymtTest__Payment_Gateway__c
-                    WHERE pymtTest__Is_Default__c = true AND pymtTest__Active__c = true
+                    FROM pymts__Payment_Gateway__c
+                    WHERE pymts__Is_Default__c = true AND pymts__Active__c = true
                     LIMIT 1
                 ];
                 gatewayId = defaultGateway.Id;
@@ -222,7 +222,7 @@ public with sharing class CallCenterService {
             // Build payment request for gateway
             PaymentRequest paymentReq = new PaymentRequest();
             paymentReq.amount = totalAmount;
-            paymentReq.paymentMethodToken = (paymentMethod != null) ? paymentMethod.pymtTest__Gateway_Token__c : request.paymentToken;
+            paymentReq.paymentMethodToken = (paymentMethod != null) ? paymentMethod.pymts__Gateway_Token__c : request.paymentToken;
             paymentReq.idempotencyKey = generateIdempotencyKey();
             
             // Process payment through gateway
@@ -231,35 +231,35 @@ public with sharing class CallCenterService {
             
             if (response.success) {
                 // Create Transaction record
-                pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-                    pymtTest__Account__c = request.accountId,
-                    pymtTest__Amount__c = totalAmount,
-                    pymtTest__Status__c = 'Completed',
-                    pymtTest__Type__c = 'Sale',
-                    pymtTest__Payment_Type__c = request.paymentType == 'ACH' ? 'ACH' : 'Credit Card',
-                    pymtTest__Sales_Channel__c = 'Phone',
-                    pymtTest__Fulfillment_Status__c = 'Pending',
-                    pymtTest__Source_Description__c = request.sourceDescription,
-                    pymtTest__Gateway_Transaction_Id__c = response.transactionId,
-                    pymtTest__Payment_Gateway__c = gatewayId,
-                    pymtTest__Payment_Method__c = (paymentMethod != null) ? paymentMethod.Id : null,
-                    pymtTest__Idempotency_Key__c = paymentReq.idempotencyKey,
-                    pymtTest__Settlement_Status__c = request.paymentType == 'ACH' ? 'Pending' : 'Pending Settlement',
-                    pymtTest__Expected_Settlement_Date__c = request.paymentType == 'ACH' 
+                pymts__Transaction__c txn = new pymts__Transaction__c(
+                    pymts__Account__c = request.accountId,
+                    pymts__Amount__c = totalAmount,
+                    pymts__Status__c = 'Completed',
+                    pymts__Type__c = 'Sale',
+                    pymts__Payment_Type__c = request.paymentType == 'ACH' ? 'ACH' : 'Credit Card',
+                    pymts__Sales_Channel__c = 'Phone',
+                    pymts__Fulfillment_Status__c = 'Pending',
+                    pymts__Source_Description__c = request.sourceDescription,
+                    pymts__Gateway_Transaction_Id__c = response.transactionId,
+                    pymts__Payment_Gateway__c = gatewayId,
+                    pymts__Payment_Method__c = (paymentMethod != null) ? paymentMethod.Id : null,
+                    pymts__Idempotency_Key__c = paymentReq.idempotencyKey,
+                    pymts__Settlement_Status__c = request.paymentType == 'ACH' ? 'Pending' : 'Pending Settlement',
+                    pymts__Expected_Settlement_Date__c = request.paymentType == 'ACH' 
                         ? Date.today().addDays(5) 
                         : Date.today().addDays(2)
                 );
                 insert txn;
                 
                 // Create Transaction Line Items
-                List<pymtTest__Transaction_Line_Item__c> lineItems = new List<pymtTest__Transaction_Line_Item__c>();
+                List<pymts__Transaction_Line_Item__c> lineItems = new List<pymts__Transaction_Line_Item__c>();
                 for (CartItem item : request.cartItems) {
-                    pymtTest__Transaction_Line_Item__c lineItem = new pymtTest__Transaction_Line_Item__c(
-                        pymtTest__Transaction__c = txn.Id,
-                        pymtTest__Product__c = item.productId,
-                        pymtTest__Quantity__c = item.quantity,
-                        pymtTest__Unit_Price__c = item.unitPrice,
-                        pymtTest__Description__c = item.description
+                    pymts__Transaction_Line_Item__c lineItem = new pymts__Transaction_Line_Item__c(
+                        pymts__Transaction__c = txn.Id,
+                        pymts__Product__c = item.productId,
+                        pymts__Quantity__c = item.quantity,
+                        pymts__Unit_Price__c = item.unitPrice,
+                        pymts__Description__c = item.description
                     );
                     lineItems.add(lineItem);
                 }
@@ -271,7 +271,7 @@ public with sharing class CallCenterService {
                 // Return success result
                 result.success = true;
                 result.transactionId = txn.Id;
-                result.transactionNumber = [SELECT Name FROM pymtTest__Transaction__c WHERE Id = :txn.Id].Name;
+                result.transactionNumber = [SELECT Name FROM pymts__Transaction__c WHERE Id = :txn.Id].Name;
                 result.amount = totalAmount;
                 
             } else {
@@ -305,35 +305,35 @@ public with sharing class CallCenterService {
     /**
      * @description Create a new payment method from the request
      */
-    private static pymtTest__Payment_Method__c createPaymentMethod(CallCenterPaymentRequest request) {
+    private static pymts__Payment_Method__c createPaymentMethod(CallCenterPaymentRequest request) {
         String gatewayId = request.gatewayId;
         if (String.isBlank(gatewayId)) {
-            pymtTest__Payment_Gateway__c defaultGateway = [
+            pymts__Payment_Gateway__c defaultGateway = [
                 SELECT Id
-                FROM pymtTest__Payment_Gateway__c
-                WHERE pymtTest__Is_Default__c = true AND pymtTest__Active__c = true
+                FROM pymts__Payment_Gateway__c
+                WHERE pymts__Is_Default__c = true AND pymts__Active__c = true
                 LIMIT 1
             ];
             gatewayId = defaultGateway.Id;
         }
         
-        pymtTest__Payment_Method__c pm = new pymtTest__Payment_Method__c(
-            pymtTest__Account__c = request.accountId,
-            pymtTest__Gateway_Token__c = request.paymentToken,
-            pymtTest__Payment_Gateway__c = gatewayId,
-            pymtTest__Active__c = true
+        pymts__Payment_Method__c pm = new pymts__Payment_Method__c(
+            pymts__Account__c = request.accountId,
+            pymts__Gateway_Token__c = request.paymentToken,
+            pymts__Payment_Gateway__c = gatewayId,
+            pymts__Active__c = true
         );
         
         if (request.paymentType == 'ACH') {
-            pm.pymtTest__Type__c = 'ACH';
-            pm.pymtTest__Last_Four__c = request.accountLastFour;
+            pm.pymts__Type__c = 'ACH';
+            pm.pymts__Last_Four__c = request.accountLastFour;
         } else {
-            pm.pymtTest__Type__c = 'Credit Card';
-            pm.pymtTest__Card_Brand__c = request.cardType;
-            pm.pymtTest__Last_Four__c = request.cardLastFour;
+            pm.pymts__Type__c = 'Credit Card';
+            pm.pymts__Card_Brand__c = request.cardType;
+            pm.pymts__Last_Four__c = request.cardLastFour;
             if (String.isNotBlank(request.expirationMonth) && String.isNotBlank(request.expirationYear)) {
-                pm.pymtTest__Expiration_Year__c = Integer.valueOf(request.expirationYear);
-                pm.pymtTest__Expiration_Month__c = Integer.valueOf(request.expirationMonth);
+                pm.pymts__Expiration_Year__c = Integer.valueOf(request.expirationYear);
+                pm.pymts__Expiration_Month__c = Integer.valueOf(request.expirationMonth);
             }
         }
         

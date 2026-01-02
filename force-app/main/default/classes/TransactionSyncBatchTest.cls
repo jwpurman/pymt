@@ -11,78 +11,78 @@ private class TransactionSyncBatchTest {
         insert testAccount;
         
         // Create gateways
-        pymtTest__Payment_Gateway__c stripeGateway = new pymtTest__Payment_Gateway__c(
+        pymts__Payment_Gateway__c stripeGateway = new pymts__Payment_Gateway__c(
             Name = 'Stripe Test',
-            pymtTest__Gateway_Type__c = 'Stripe',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = true,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Stripe',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = true,
+            pymts__Environment__c = 'Test'
         );
         
-        pymtTest__Payment_Gateway__c authNetGateway = new pymtTest__Payment_Gateway__c(
+        pymts__Payment_Gateway__c authNetGateway = new pymts__Payment_Gateway__c(
             Name = 'AuthNet Test',
-            pymtTest__Gateway_Type__c = 'Authorize.Net',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = false,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Authorize.Net',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = false,
+            pymts__Environment__c = 'Test'
         );
-        insert new List<pymtTest__Payment_Gateway__c>{ stripeGateway, authNetGateway };
+        insert new List<pymts__Payment_Gateway__c>{ stripeGateway, authNetGateway };
         
         // Create invoices
-        pymtTest__Invoice__c invoice1 = new pymtTest__Invoice__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Total_Amount__c = 100.00,
-            pymtTest__Amount_Paid__c = 100.00,
-            pymtTest__Status__c = 'Paid',
-            pymtTest__Due_Date__c = Date.today().addDays(30)
+        pymts__Invoice__c invoice1 = new pymts__Invoice__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Total_Amount__c = 100.00,
+            pymts__Amount_Paid__c = 100.00,
+            pymts__Status__c = 'Paid',
+            pymts__Due_Date__c = Date.today().addDays(30)
         );
         
-        pymtTest__Invoice__c invoice2 = new pymtTest__Invoice__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Total_Amount__c = 200.00,
-            pymtTest__Amount_Paid__c = 200.00,
-            pymtTest__Status__c = 'Paid',
-            pymtTest__Due_Date__c = Date.today().addDays(30)
+        pymts__Invoice__c invoice2 = new pymts__Invoice__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Total_Amount__c = 200.00,
+            pymts__Amount_Paid__c = 200.00,
+            pymts__Status__c = 'Paid',
+            pymts__Due_Date__c = Date.today().addDays(30)
         );
-        insert new List<pymtTest__Invoice__c>{ invoice1, invoice2 };
+        insert new List<pymts__Invoice__c>{ invoice1, invoice2 };
         
         // Create pending settlement transactions
-        pymtTest__Transaction__c stripeTxn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Payment_Gateway__c = stripeGateway.Id,
-            pymtTest__Amount__c = 100.00,
-            pymtTest__Type__c = 'Sale',
-            pymtTest__Status__c = 'Approved',
-            pymtTest__Settlement_Status__c = 'Pending',
-            pymtTest__Payment_Type__c = 'Credit Card',
-            pymtTest__Gateway_Transaction_Id__c = 'pi_test_stripe_123'
+        pymts__Transaction__c stripeTxn = new pymts__Transaction__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Payment_Gateway__c = stripeGateway.Id,
+            pymts__Amount__c = 100.00,
+            pymts__Type__c = 'Sale',
+            pymts__Status__c = 'Approved',
+            pymts__Settlement_Status__c = 'Pending',
+            pymts__Payment_Type__c = 'Credit Card',
+            pymts__Gateway_Transaction_Id__c = 'pi_test_stripe_123'
         );
         
-        pymtTest__Transaction__c authNetTxn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Payment_Gateway__c = authNetGateway.Id,
-            pymtTest__Amount__c = 200.00,
-            pymtTest__Type__c = 'Sale',
-            pymtTest__Status__c = 'Approved',
-            pymtTest__Settlement_Status__c = 'Pending Settlement',
-            pymtTest__Payment_Type__c = 'ACH',
-            pymtTest__Gateway_Transaction_Id__c = '12345678'
+        pymts__Transaction__c authNetTxn = new pymts__Transaction__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Payment_Gateway__c = authNetGateway.Id,
+            pymts__Amount__c = 200.00,
+            pymts__Type__c = 'Sale',
+            pymts__Status__c = 'Approved',
+            pymts__Settlement_Status__c = 'Pending Settlement',
+            pymts__Payment_Type__c = 'ACH',
+            pymts__Gateway_Transaction_Id__c = '12345678'
         );
-        insert new List<pymtTest__Transaction__c>{ stripeTxn, authNetTxn };
+        insert new List<pymts__Transaction__c>{ stripeTxn, authNetTxn };
         
         // Create allocations
-        pymtTest__Payment_Allocation__c alloc1 = new pymtTest__Payment_Allocation__c(
-            pymtTest__Transaction__c = stripeTxn.Id,
-            pymtTest__Invoice__c = invoice1.Id,
-            pymtTest__Amount__c = 100.00
+        pymts__Payment_Allocation__c alloc1 = new pymts__Payment_Allocation__c(
+            pymts__Transaction__c = stripeTxn.Id,
+            pymts__Invoice__c = invoice1.Id,
+            pymts__Amount__c = 100.00
         );
         
-        pymtTest__Payment_Allocation__c alloc2 = new pymtTest__Payment_Allocation__c(
-            pymtTest__Transaction__c = authNetTxn.Id,
-            pymtTest__Invoice__c = invoice2.Id,
-            pymtTest__Amount__c = 200.00
+        pymts__Payment_Allocation__c alloc2 = new pymts__Payment_Allocation__c(
+            pymts__Transaction__c = authNetTxn.Id,
+            pymts__Invoice__c = invoice2.Id,
+            pymts__Amount__c = 200.00
         );
-        insert new List<pymtTest__Payment_Allocation__c>{ alloc1, alloc2 };
+        insert new List<pymts__Payment_Allocation__c>{ alloc1, alloc2 };
     }
     
     @isTest
@@ -95,14 +95,14 @@ private class TransactionSyncBatchTest {
         Test.stopTest();
         
         // Verify Stripe transaction was updated
-        pymtTest__Transaction__c stripeTxn = [
-            SELECT pymtTest__Settlement_Status__c, pymtTest__Last_Sync_Date__c
-            FROM pymtTest__Transaction__c
-            WHERE pymtTest__Gateway_Transaction_Id__c = 'pi_test_stripe_123'
+        pymts__Transaction__c stripeTxn = [
+            SELECT pymts__Settlement_Status__c, pymts__Last_Sync_Date__c
+            FROM pymts__Transaction__c
+            WHERE pymts__Gateway_Transaction_Id__c = 'pi_test_stripe_123'
         ];
         
-        System.assertEquals('Settled', stripeTxn.pymtTest__Settlement_Status__c, 'Stripe txn should be settled');
-        System.assertNotEquals(null, stripeTxn.pymtTest__Last_Sync_Date__c, 'Last sync date should be set');
+        System.assertEquals('Settled', stripeTxn.pymts__Settlement_Status__c, 'Stripe txn should be settled');
+        System.assertNotEquals(null, stripeTxn.pymts__Last_Sync_Date__c, 'Last sync date should be set');
     }
     
     @isTest
@@ -115,23 +115,23 @@ private class TransactionSyncBatchTest {
         Test.stopTest();
         
         // Verify AuthNet transaction was updated
-        pymtTest__Transaction__c authNetTxn = [
-            SELECT pymtTest__Settlement_Status__c, pymtTest__Settlement_Date__c
-            FROM pymtTest__Transaction__c
-            WHERE pymtTest__Gateway_Transaction_Id__c = '12345678'
+        pymts__Transaction__c authNetTxn = [
+            SELECT pymts__Settlement_Status__c, pymts__Settlement_Date__c
+            FROM pymts__Transaction__c
+            WHERE pymts__Gateway_Transaction_Id__c = '12345678'
         ];
         
-        System.assertEquals('Settled', authNetTxn.pymtTest__Settlement_Status__c, 'AuthNet txn should be settled');
+        System.assertEquals('Settled', authNetTxn.pymts__Settlement_Status__c, 'AuthNet txn should be settled');
     }
     
     @isTest
     static void testBatchSyncACHReturn() {
         // Update transaction to simulate ACH waiting for settlement
-        pymtTest__Transaction__c achTxn = [
-            SELECT Id FROM pymtTest__Transaction__c 
-            WHERE pymtTest__Payment_Type__c = 'ACH'
+        pymts__Transaction__c achTxn = [
+            SELECT Id FROM pymts__Transaction__c 
+            WHERE pymts__Payment_Type__c = 'ACH'
         ];
-        achTxn.pymtTest__Settlement_Status__c = 'Settled';
+        achTxn.pymts__Settlement_Status__c = 'Settled';
         update achTxn;
         
         Test.setMock(HttpCalloutMock.class, new ACHReturnMock());
@@ -143,29 +143,29 @@ private class TransactionSyncBatchTest {
         
         // Verify transaction was marked as returned
         achTxn = [
-            SELECT pymtTest__Status__c, pymtTest__Settlement_Status__c, pymtTest__Return_Reason_Code__c
-            FROM pymtTest__Transaction__c
+            SELECT pymts__Status__c, pymts__Settlement_Status__c, pymts__Return_Reason_Code__c
+            FROM pymts__Transaction__c
             WHERE Id = :achTxn.Id
         ];
         
-        System.assertEquals('Returned', achTxn.pymtTest__Settlement_Status__c, 'Should be marked as returned');
-        System.assertEquals('R01', achTxn.pymtTest__Return_Reason_Code__c, 'Return code should be R01');
+        System.assertEquals('Returned', achTxn.pymts__Settlement_Status__c, 'Should be marked as returned');
+        System.assertEquals('R01', achTxn.pymts__Return_Reason_Code__c, 'Return code should be R01');
         
         // Verify invoice was reversed
-        pymtTest__Invoice__c invoice = [
-            SELECT pymtTest__Amount_Paid__c, pymtTest__Status__c
-            FROM pymtTest__Invoice__c
-            WHERE pymtTest__Total_Amount__c = 200.00
+        pymts__Invoice__c invoice = [
+            SELECT pymts__Amount_Paid__c, pymts__Status__c
+            FROM pymts__Invoice__c
+            WHERE pymts__Total_Amount__c = 200.00
         ];
         
-        System.assertEquals(0, invoice.pymtTest__Amount_Paid__c, 'Invoice payment should be reversed');
-        System.assertEquals('Pending', invoice.pymtTest__Status__c, 'Invoice status should be Pending');
+        System.assertEquals(0, invoice.pymts__Amount_Paid__c, 'Invoice payment should be reversed');
+        System.assertEquals('Pending', invoice.pymts__Status__c, 'Invoice status should be Pending');
     }
     
     @isTest
     static void testBatchSyncSpecificGateway() {
-        pymtTest__Payment_Gateway__c stripeGateway = [
-            SELECT Id FROM pymtTest__Payment_Gateway__c WHERE pymtTest__Gateway_Type__c = 'Stripe'
+        pymts__Payment_Gateway__c stripeGateway = [
+            SELECT Id FROM pymts__Payment_Gateway__c WHERE pymts__Gateway_Type__c = 'Stripe'
         ];
         
         Test.setMock(HttpCalloutMock.class, new MultiGatewayMock());
@@ -176,13 +176,13 @@ private class TransactionSyncBatchTest {
         Test.stopTest();
         
         // Verify only Stripe transaction was processed
-        pymtTest__Transaction__c stripeTxn = [
-            SELECT pymtTest__Settlement_Status__c
-            FROM pymtTest__Transaction__c
-            WHERE pymtTest__Gateway_Transaction_Id__c = 'pi_test_stripe_123'
+        pymts__Transaction__c stripeTxn = [
+            SELECT pymts__Settlement_Status__c
+            FROM pymts__Transaction__c
+            WHERE pymts__Gateway_Transaction_Id__c = 'pi_test_stripe_123'
         ];
         
-        System.assertEquals('Settled', stripeTxn.pymtTest__Settlement_Status__c, 'Stripe txn should be settled');
+        System.assertEquals('Settled', stripeTxn.pymts__Settlement_Status__c, 'Stripe txn should be settled');
     }
     
     @isTest
@@ -281,9 +281,9 @@ private class TransactionSyncBatchTest {
         Test.stopTest();
         
         // Verify audit logs were created
-        List<pymtTest__Audit_Log__c> logs = [
-            SELECT pymtTest__Action__c, pymtTest__Details__c 
-            FROM pymtTest__Audit_Log__c
+        List<pymts__Audit_Log__c> logs = [
+            SELECT pymts__Action__c, pymts__Details__c 
+            FROM pymts__Audit_Log__c
         ];
         
         // At least one audit log should be created for settled transactions

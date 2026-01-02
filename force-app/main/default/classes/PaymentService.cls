@@ -47,10 +47,10 @@ public with sharing class PaymentService {
             
             if (response.success) {
                 // Create transaction record
-                pymtTest__Transaction__c txn = createTransactionRecord(paymentData, response);
+                pymts__Transaction__c txn = createTransactionRecord(paymentData, response);
                 
                 // Create payment allocations
-                List<pymtTest__Payment_Allocation__c> allocations = createPaymentAllocations(
+                List<pymts__Payment_Allocation__c> allocations = createPaymentAllocations(
                     txn.Id, paymentData.invoiceAllocations
                 );
                 
@@ -99,48 +99,48 @@ public with sharing class PaymentService {
     @AuraEnabled
     public static PaymentResult processRefund(Id transactionId, Decimal amount) {
         try {
-            pymtTest__Transaction__c originalTxn = [
-                SELECT Id, pymtTest__Amount__c, pymtTest__Gateway_Transaction_Id__c,
-                       pymtTest__Payment_Gateway__c, pymtTest__Account__c, pymtTest__Status__c
-                FROM pymtTest__Transaction__c
+            pymts__Transaction__c originalTxn = [
+                SELECT Id, pymts__Amount__c, pymts__Gateway_Transaction_Id__c,
+                       pymts__Payment_Gateway__c, pymts__Account__c, pymts__Status__c
+                FROM pymts__Transaction__c
                 WHERE Id = :transactionId
                 LIMIT 1
             ];
             
-            if (originalTxn.pymtTest__Status__c == 'Refunded') {
+            if (originalTxn.pymts__Status__c == 'Refunded') {
                 return paymentFailure('Transaction has already been fully refunded');
             }
             
-            Decimal refundAmount = amount != null ? amount : originalTxn.pymtTest__Amount__c;
+            Decimal refundAmount = amount != null ? amount : originalTxn.pymts__Amount__c;
             
-            PaymentGateway gateway = GatewayFactory.getGateway(originalTxn.pymtTest__Payment_Gateway__c);
-            PaymentResponse response = gateway.refund(originalTxn.pymtTest__Gateway_Transaction_Id__c, refundAmount);
+            PaymentGateway gateway = GatewayFactory.getGateway(originalTxn.pymts__Payment_Gateway__c);
+            PaymentResponse response = gateway.refund(originalTxn.pymts__Gateway_Transaction_Id__c, refundAmount);
             
             if (response.success) {
                 // Create refund transaction record
-                pymtTest__Transaction__c refundTxn = new pymtTest__Transaction__c(
-                    pymtTest__Type__c = 'Refund',
-                    pymtTest__Amount__c = refundAmount,
-                    pymtTest__Status__c = 'Approved',
-                    pymtTest__Gateway_Transaction_Id__c = response.transactionId,
-                    pymtTest__Payment_Gateway__c = originalTxn.pymtTest__Payment_Gateway__c,
-                    pymtTest__Account__c = originalTxn.pymtTest__Account__c,
-                    pymtTest__Response_Message__c = response.rawResponse
+                pymts__Transaction__c refundTxn = new pymts__Transaction__c(
+                    pymts__Type__c = 'Refund',
+                    pymts__Amount__c = refundAmount,
+                    pymts__Status__c = 'Approved',
+                    pymts__Gateway_Transaction_Id__c = response.transactionId,
+                    pymts__Payment_Gateway__c = originalTxn.pymts__Payment_Gateway__c,
+                    pymts__Account__c = originalTxn.pymts__Account__c,
+                    pymts__Response_Message__c = response.rawResponse
                 );
                 insert refundTxn;
                 
                 // Update original transaction status
-                if (refundAmount >= originalTxn.pymtTest__Amount__c) {
-                    originalTxn.pymtTest__Status__c = 'Refunded';
+                if (refundAmount >= originalTxn.pymts__Amount__c) {
+                    originalTxn.pymts__Status__c = 'Refunded';
                 } else {
-                    originalTxn.pymtTest__Status__c = 'Partially Refunded';
+                    originalTxn.pymts__Status__c = 'Partially Refunded';
                 }
                 update originalTxn;
                 
                 // Update invoice allocations and amounts
                 reverseAllocations(transactionId, refundAmount);
                 
-                createAuditLog('Refund Processed', refundTxn.Id, originalTxn.pymtTest__Account__c,
+                createAuditLog('Refund Processed', refundTxn.Id, originalTxn.pymts__Account__c,
                               'Refund of ' + refundAmount + ' processed');
                 
                 return paymentSuccess(refundTxn.Id, response.transactionId);
@@ -161,29 +161,29 @@ public with sharing class PaymentService {
     @AuraEnabled
     public static PaymentResult voidTransaction(Id transactionId) {
         try {
-            pymtTest__Transaction__c txn = [
-                SELECT Id, pymtTest__Amount__c, pymtTest__Gateway_Transaction_Id__c,
-                       pymtTest__Payment_Gateway__c, pymtTest__Account__c, pymtTest__Status__c
-                FROM pymtTest__Transaction__c
+            pymts__Transaction__c txn = [
+                SELECT Id, pymts__Amount__c, pymts__Gateway_Transaction_Id__c,
+                       pymts__Payment_Gateway__c, pymts__Account__c, pymts__Status__c
+                FROM pymts__Transaction__c
                 WHERE Id = :transactionId
                 LIMIT 1
             ];
             
-            if (txn.pymtTest__Status__c != 'Approved' && txn.pymtTest__Status__c != 'Pending') {
+            if (txn.pymts__Status__c != 'Approved' && txn.pymts__Status__c != 'Pending') {
                 return paymentFailure('Transaction cannot be voided in current status');
             }
             
-            PaymentGateway gateway = GatewayFactory.getGateway(txn.pymtTest__Payment_Gateway__c);
-            PaymentResponse response = gateway.voidTransaction(txn.pymtTest__Gateway_Transaction_Id__c);
+            PaymentGateway gateway = GatewayFactory.getGateway(txn.pymts__Payment_Gateway__c);
+            PaymentResponse response = gateway.voidTransaction(txn.pymts__Gateway_Transaction_Id__c);
             
             if (response.success) {
-                txn.pymtTest__Status__c = 'Voided';
+                txn.pymts__Status__c = 'Voided';
                 update txn;
                 
                 // Reverse allocations
-                reverseAllocations(transactionId, txn.pymtTest__Amount__c);
+                reverseAllocations(transactionId, txn.pymts__Amount__c);
                 
-                createAuditLog('Transaction Voided', txn.Id, txn.pymtTest__Account__c,
+                createAuditLog('Transaction Voided', txn.Id, txn.pymts__Account__c,
                               'Transaction voided');
                 
                 return paymentSuccess(txn.Id, response.transactionId);
@@ -205,19 +205,19 @@ public with sharing class PaymentService {
     public static List<InvoiceWrapper> getOpenInvoices(Id accountId) {
         List<InvoiceWrapper> wrappers = new List<InvoiceWrapper>();
         
-        List<pymtTest__Invoice__c> invoices = [
-            SELECT Id, Name, pymtTest__Total_Amount__c, pymtTest__Amount_Paid__c,
-                   pymtTest__Balance_Due__c, pymtTest__Due_Date__c, pymtTest__Status__c,
-                   pymtTest__Order__c, pymtTest__Order__r.OrderNumber,
-                   pymtTest__Payment_Gateway__c, pymtTest__Payment_Gateway__r.Name
-            FROM pymtTest__Invoice__c
-            WHERE pymtTest__Account__c = :accountId
-            AND pymtTest__Balance_Due__c > 0
-            AND pymtTest__Status__c NOT IN ('Cancelled', 'Paid')
-            ORDER BY pymtTest__Due_Date__c ASC
+        List<pymts__Invoice__c> invoices = [
+            SELECT Id, Name, pymts__Total_Amount__c, pymts__Amount_Paid__c,
+                   pymts__Balance_Due__c, pymts__Due_Date__c, pymts__Status__c,
+                   pymts__Order__c, pymts__Order__r.OrderNumber,
+                   pymts__Payment_Gateway__c, pymts__Payment_Gateway__r.Name
+            FROM pymts__Invoice__c
+            WHERE pymts__Account__c = :accountId
+            AND pymts__Balance_Due__c > 0
+            AND pymts__Status__c NOT IN ('Cancelled', 'Paid')
+            ORDER BY pymts__Due_Date__c ASC
         ];
         
-        for (pymtTest__Invoice__c inv : invoices) {
+        for (pymts__Invoice__c inv : invoices) {
             wrappers.add(new InvoiceWrapper(inv));
         }
         
@@ -233,18 +233,18 @@ public with sharing class PaymentService {
     public static List<PaymentMethodWrapper> getPaymentMethods(Id accountId) {
         List<PaymentMethodWrapper> wrappers = new List<PaymentMethodWrapper>();
         
-        List<pymtTest__Payment_Method__c> methods = [
-            SELECT Id, Name, pymtTest__Type__c, pymtTest__Card_Brand__c, pymtTest__Last_Four__c,
-                   pymtTest__Expiration_Month__c, pymtTest__Expiration_Year__c, pymtTest__Active__c,
-                   pymtTest__Is_Primary__c, pymtTest__Is_Expired__c, pymtTest__Payment_Gateway__c,
-                   pymtTest__Payment_Gateway__r.Name, pymtTest__Payment_Gateway__r.pymtTest__Gateway_Type__c
-            FROM pymtTest__Payment_Method__c
-            WHERE pymtTest__Account__c = :accountId
-            AND pymtTest__Active__c = true
-            ORDER BY pymtTest__Is_Primary__c DESC, CreatedDate DESC
+        List<pymts__Payment_Method__c> methods = [
+            SELECT Id, Name, pymts__Type__c, pymts__Card_Brand__c, pymts__Last_Four__c,
+                   pymts__Expiration_Month__c, pymts__Expiration_Year__c, pymts__Active__c,
+                   pymts__Is_Primary__c, pymts__Is_Expired__c, pymts__Payment_Gateway__c,
+                   pymts__Payment_Gateway__r.Name, pymts__Payment_Gateway__r.pymts__Gateway_Type__c
+            FROM pymts__Payment_Method__c
+            WHERE pymts__Account__c = :accountId
+            AND pymts__Active__c = true
+            ORDER BY pymts__Is_Primary__c DESC, CreatedDate DESC
         ];
         
-        for (pymtTest__Payment_Method__c pm : methods) {
+        for (pymts__Payment_Method__c pm : methods) {
             wrappers.add(new PaymentMethodWrapper(pm));
         }
         
@@ -266,35 +266,35 @@ public with sharing class PaymentService {
         try {
             // If setting as primary, unset other primary methods
             if (setAsPrimary) {
-                List<pymtTest__Payment_Method__c> existingPrimary = [
-                    SELECT Id, pymtTest__Is_Primary__c
-                    FROM pymtTest__Payment_Method__c
-                    WHERE pymtTest__Account__c = :accountId AND pymtTest__Is_Primary__c = true
+                List<pymts__Payment_Method__c> existingPrimary = [
+                    SELECT Id, pymts__Is_Primary__c
+                    FROM pymts__Payment_Method__c
+                    WHERE pymts__Account__c = :accountId AND pymts__Is_Primary__c = true
                 ];
-                for (pymtTest__Payment_Method__c pm : existingPrimary) {
-                    pm.pymtTest__Is_Primary__c = false;
+                for (pymts__Payment_Method__c pm : existingPrimary) {
+                    pm.pymts__Is_Primary__c = false;
                 }
                 update existingPrimary;
             }
             
-            pymtTest__Payment_Method__c newMethod = new pymtTest__Payment_Method__c(
-                pymtTest__Account__c = accountId,
-                pymtTest__Payment_Gateway__c = gatewayId,
-                pymtTest__Gateway_Token__c = token,
-                pymtTest__Type__c = 'Credit Card',
-                pymtTest__Card_Brand__c = (String) cardDetails.get('brand'),
-                pymtTest__Last_Four__c = (String) cardDetails.get('last4'),
-                pymtTest__Expiration_Month__c = (Integer) cardDetails.get('expMonth'),
-                pymtTest__Expiration_Year__c = (Integer) cardDetails.get('expYear'),
-                pymtTest__Active__c = true,
-                pymtTest__Is_Primary__c = setAsPrimary
+            pymts__Payment_Method__c newMethod = new pymts__Payment_Method__c(
+                pymts__Account__c = accountId,
+                pymts__Payment_Gateway__c = gatewayId,
+                pymts__Gateway_Token__c = token,
+                pymts__Type__c = 'Credit Card',
+                pymts__Card_Brand__c = (String) cardDetails.get('brand'),
+                pymts__Last_Four__c = (String) cardDetails.get('last4'),
+                pymts__Expiration_Month__c = (Integer) cardDetails.get('expMonth'),
+                pymts__Expiration_Year__c = (Integer) cardDetails.get('expYear'),
+                pymts__Active__c = true,
+                pymts__Is_Primary__c = setAsPrimary
             );
             
             insert newMethod;
             
             createAuditLog('Payment Method Added', null, accountId,
-                          'New payment method added: ' + newMethod.pymtTest__Card_Brand__c + 
-                          ' ending in ' + newMethod.pymtTest__Last_Four__c);
+                          'New payment method added: ' + newMethod.pymts__Card_Brand__c + 
+                          ' ending in ' + newMethod.pymts__Last_Four__c);
             
             return newMethod.Id;
             
@@ -310,26 +310,26 @@ public with sharing class PaymentService {
     @AuraEnabled
     public static void setPrimaryPaymentMethod(Id paymentMethodId) {
         try {
-            pymtTest__Payment_Method__c method = [
-                SELECT Id, pymtTest__Account__c, pymtTest__Is_Primary__c
-                FROM pymtTest__Payment_Method__c
+            pymts__Payment_Method__c method = [
+                SELECT Id, pymts__Account__c, pymts__Is_Primary__c
+                FROM pymts__Payment_Method__c
                 WHERE Id = :paymentMethodId
             ];
             
             // Unset other primary methods for this account
-            List<pymtTest__Payment_Method__c> existingPrimary = [
-                SELECT Id, pymtTest__Is_Primary__c
-                FROM pymtTest__Payment_Method__c
-                WHERE pymtTest__Account__c = :method.pymtTest__Account__c 
-                AND pymtTest__Is_Primary__c = true
+            List<pymts__Payment_Method__c> existingPrimary = [
+                SELECT Id, pymts__Is_Primary__c
+                FROM pymts__Payment_Method__c
+                WHERE pymts__Account__c = :method.pymts__Account__c 
+                AND pymts__Is_Primary__c = true
                 AND Id != :paymentMethodId
             ];
-            for (pymtTest__Payment_Method__c pm : existingPrimary) {
-                pm.pymtTest__Is_Primary__c = false;
+            for (pymts__Payment_Method__c pm : existingPrimary) {
+                pm.pymts__Is_Primary__c = false;
             }
             update existingPrimary;
             
-            method.pymtTest__Is_Primary__c = true;
+            method.pymts__Is_Primary__c = true;
             update method;
             
         } catch (Exception e) {
@@ -344,12 +344,12 @@ public with sharing class PaymentService {
     @AuraEnabled
     public static void deactivatePaymentMethod(Id paymentMethodId) {
         try {
-            pymtTest__Payment_Method__c method = [
-                SELECT Id, pymtTest__Active__c
-                FROM pymtTest__Payment_Method__c
+            pymts__Payment_Method__c method = [
+                SELECT Id, pymts__Active__c
+                FROM pymts__Payment_Method__c
                 WHERE Id = :paymentMethodId
             ];
-            method.pymtTest__Active__c = false;
+            method.pymts__Active__c = false;
             update method;
         } catch (Exception e) {
             throw new AuraHandledException('Error deactivating payment method: ' + e.getMessage());
@@ -365,32 +365,32 @@ public with sharing class PaymentService {
     @AuraEnabled
     public static void applyCredit(Id creditId, Id invoiceId, Decimal amount) {
         try {
-            pymtTest__Account_Credit__c credit = [
-                SELECT Id, pymtTest__Remaining_Balance__c
-                FROM pymtTest__Account_Credit__c
+            pymts__Account_Credit__c credit = [
+                SELECT Id, pymts__Remaining_Balance__c
+                FROM pymts__Account_Credit__c
                 WHERE Id = :creditId
             ];
             
-            if (credit.pymtTest__Remaining_Balance__c < amount) {
+            if (credit.pymts__Remaining_Balance__c < amount) {
                 throw new AuraHandledException('Insufficient credit balance');
             }
             
-            pymtTest__Invoice__c invoice = [
-                SELECT Id, pymtTest__Amount_Paid__c, pymtTest__Balance_Due__c
-                FROM pymtTest__Invoice__c
+            pymts__Invoice__c invoice = [
+                SELECT Id, pymts__Amount_Paid__c, pymts__Balance_Due__c
+                FROM pymts__Invoice__c
                 WHERE Id = :invoiceId
             ];
             
-            if (amount > invoice.pymtTest__Balance_Due__c) {
+            if (amount > invoice.pymts__Balance_Due__c) {
                 throw new AuraHandledException('Amount exceeds invoice balance');
             }
             
             // Update credit
-            credit.pymtTest__Remaining_Balance__c -= amount;
+            credit.pymts__Remaining_Balance__c -= amount;
             update credit;
             
             // Update invoice
-            invoice.pymtTest__Amount_Paid__c += amount;
+            invoice.pymts__Amount_Paid__c += amount;
             updateInvoiceStatus(invoice);
             update invoice;
             
@@ -401,16 +401,16 @@ public with sharing class PaymentService {
     
     /**
      * @description Get active payment gateways
-     * @return List<pymtTest__Payment_Gateway__c> List of active gateways
+     * @return List<pymts__Payment_Gateway__c> List of active gateways
      */
     @AuraEnabled(cacheable=true)
-    public static List<pymtTest__Payment_Gateway__c> getActiveGateways() {
+    public static List<pymts__Payment_Gateway__c> getActiveGateways() {
         return [
-            SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Environment__c,
-                   pymtTest__Is_Default__c, pymtTest__Active__c
-            FROM pymtTest__Payment_Gateway__c
-            WHERE pymtTest__Active__c = true
-            ORDER BY pymtTest__Is_Default__c DESC, Name ASC
+            SELECT Id, Name, pymts__Gateway_Type__c, pymts__Environment__c,
+                   pymts__Is_Default__c, pymts__Active__c
+            FROM pymts__Payment_Gateway__c
+            WHERE pymts__Active__c = true
+            ORDER BY pymts__Is_Default__c DESC, Name ASC
         ];
     }
     
@@ -421,21 +421,21 @@ public with sharing class PaymentService {
      */
     @AuraEnabled(cacheable=true)
     public static Map<String, Object> getGatewayConfiguration(Id gatewayId) {
-        pymtTest__Payment_Gateway__c gateway = [
-            SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Environment__c,
-                   pymtTest__Public_Key__c, pymtTest__Active__c, pymtTest__Is_Default__c
-            FROM pymtTest__Payment_Gateway__c
+        pymts__Payment_Gateway__c gateway = [
+            SELECT Id, Name, pymts__Gateway_Type__c, pymts__Environment__c,
+                   pymts__Public_Key__c, pymts__Active__c, pymts__Is_Default__c
+            FROM pymts__Payment_Gateway__c
             WHERE Id = :gatewayId
         ];
         
         Map<String, Object> config = new Map<String, Object>();
         config.put('id', gateway.Id);
         config.put('name', gateway.Name);
-        config.put('type', gateway.pymtTest__Gateway_Type__c);
-        config.put('environment', gateway.pymtTest__Environment__c);
-        config.put('publicKey', gateway.pymtTest__Public_Key__c);
-        config.put('isActive', gateway.pymtTest__Active__c);
-        config.put('isDefault', gateway.pymtTest__Is_Default__c);
+        config.put('type', gateway.pymts__Gateway_Type__c);
+        config.put('environment', gateway.pymts__Environment__c);
+        config.put('publicKey', gateway.pymts__Public_Key__c);
+        config.put('isActive', gateway.pymts__Active__c);
+        config.put('isDefault', gateway.pymts__Is_Default__c);
         
         return config;
     }
@@ -452,26 +452,26 @@ public with sharing class PaymentService {
     /**
      * @description Get account credits for an account
      * @param accountId The account ID
-     * @return List<pymtTest__Account_Credit__c> List of credits with remaining balance
+     * @return List<pymts__Account_Credit__c> List of credits with remaining balance
      */
     @AuraEnabled(cacheable=true)
-    public static List<pymtTest__Account_Credit__c> getAccountCredits(Id accountId) {
+    public static List<pymts__Account_Credit__c> getAccountCredits(Id accountId) {
         return getAvailableCredits(accountId);
     }
     
     /**
      * @description Get available credits for an account
      * @param accountId The account ID
-     * @return List<pymtTest__Account_Credit__c> List of credits with remaining balance
+     * @return List<pymts__Account_Credit__c> List of credits with remaining balance
      */
     @AuraEnabled(cacheable=true)
-    public static List<pymtTest__Account_Credit__c> getAvailableCredits(Id accountId) {
+    public static List<pymts__Account_Credit__c> getAvailableCredits(Id accountId) {
         return [
-            SELECT Id, Name, pymtTest__Original_Amount__c, pymtTest__Remaining_Balance__c,
+            SELECT Id, Name, pymts__Original_Amount__c, pymts__Remaining_Balance__c,
                    CreatedDate
-            FROM pymtTest__Account_Credit__c
-            WHERE pymtTest__Account__c = :accountId
-            AND pymtTest__Remaining_Balance__c > 0
+            FROM pymts__Account_Credit__c
+            WHERE pymts__Account__c = :accountId
+            AND pymts__Remaining_Balance__c > 0
             ORDER BY CreatedDate ASC
         ];
     }
@@ -522,32 +522,32 @@ public with sharing class PaymentService {
         return request;
     }
     
-    private static pymtTest__Transaction__c createTransactionRecord(PaymentData data, PaymentResponse response) {
-        pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-            pymtTest__Type__c = 'Sale',
-            pymtTest__Amount__c = data.amount,
-            pymtTest__Status__c = response.status == 'Approved' ? 'Approved' : 'Declined',
-            pymtTest__Gateway_Transaction_Id__c = response.transactionId,
-            pymtTest__Payment_Gateway__c = data.gatewayId,
-            pymtTest__Account__c = data.accountId,
-            pymtTest__Payment_Method__c = data.paymentMethodId,
-            pymtTest__Response_Message__c = response.rawResponse,
-            pymtTest__Idempotency_Key__c = data.idempotencyKey
+    private static pymts__Transaction__c createTransactionRecord(PaymentData data, PaymentResponse response) {
+        pymts__Transaction__c txn = new pymts__Transaction__c(
+            pymts__Type__c = 'Sale',
+            pymts__Amount__c = data.amount,
+            pymts__Status__c = response.status == 'Approved' ? 'Approved' : 'Declined',
+            pymts__Gateway_Transaction_Id__c = response.transactionId,
+            pymts__Payment_Gateway__c = data.gatewayId,
+            pymts__Account__c = data.accountId,
+            pymts__Payment_Method__c = data.paymentMethodId,
+            pymts__Response_Message__c = response.rawResponse,
+            pymts__Idempotency_Key__c = data.idempotencyKey
         );
         insert txn;
         return txn;
     }
     
-    private static List<pymtTest__Payment_Allocation__c> createPaymentAllocations(
+    private static List<pymts__Payment_Allocation__c> createPaymentAllocations(
         Id transactionId, List<InvoiceAllocation> allocations
     ) {
-        List<pymtTest__Payment_Allocation__c> records = new List<pymtTest__Payment_Allocation__c>();
+        List<pymts__Payment_Allocation__c> records = new List<pymts__Payment_Allocation__c>();
         
         for (InvoiceAllocation alloc : allocations) {
-            records.add(new pymtTest__Payment_Allocation__c(
-                pymtTest__Transaction__c = transactionId,
-                pymtTest__Invoice__c = alloc.invoiceId,
-                pymtTest__Amount__c = alloc.amount
+            records.add(new pymts__Payment_Allocation__c(
+                pymts__Transaction__c = transactionId,
+                pymts__Invoice__c = alloc.invoiceId,
+                pymts__Amount__c = alloc.amount
             ));
         }
         
@@ -568,27 +568,27 @@ public with sharing class PaymentService {
                 amountsByInvoice.get(alloc.invoiceId) + alloc.amount);
         }
         
-        List<pymtTest__Invoice__c> invoices = [
-            SELECT Id, pymtTest__Amount_Paid__c, pymtTest__Total_Amount__c, pymtTest__Status__c
-            FROM pymtTest__Invoice__c
+        List<pymts__Invoice__c> invoices = [
+            SELECT Id, pymts__Amount_Paid__c, pymts__Total_Amount__c, pymts__Status__c
+            FROM pymts__Invoice__c
             WHERE Id IN :invoiceIds
         ];
         
-        for (pymtTest__Invoice__c inv : invoices) {
-            inv.pymtTest__Amount_Paid__c += amountsByInvoice.get(inv.Id);
+        for (pymts__Invoice__c inv : invoices) {
+            inv.pymts__Amount_Paid__c += amountsByInvoice.get(inv.Id);
             updateInvoiceStatus(inv);
         }
         
         update invoices;
     }
     
-    private static void updateInvoiceStatus(pymtTest__Invoice__c invoice) {
-        Decimal balance = invoice.pymtTest__Total_Amount__c - invoice.pymtTest__Amount_Paid__c;
+    private static void updateInvoiceStatus(pymts__Invoice__c invoice) {
+        Decimal balance = invoice.pymts__Total_Amount__c - invoice.pymts__Amount_Paid__c;
         
         if (balance <= 0) {
-            invoice.pymtTest__Status__c = 'Paid';
-        } else if (invoice.pymtTest__Amount_Paid__c > 0) {
-            invoice.pymtTest__Status__c = 'Partially Paid';
+            invoice.pymts__Status__c = 'Paid';
+        } else if (invoice.pymts__Amount_Paid__c > 0) {
+            invoice.pymts__Status__c = 'Partially Paid';
         }
     }
     
@@ -601,21 +601,21 @@ public with sharing class PaymentService {
     }
     
     private static void createAccountCredit(Id accountId, Id transactionId, Decimal amount) {
-        pymtTest__Account_Credit__c credit = new pymtTest__Account_Credit__c(
-            pymtTest__Account__c = accountId,
-            pymtTest__Source_Transaction__c = transactionId,
-            pymtTest__Original_Amount__c = amount,
-            pymtTest__Remaining_Balance__c = amount
+        pymts__Account_Credit__c credit = new pymts__Account_Credit__c(
+            pymts__Account__c = accountId,
+            pymts__Source_Transaction__c = transactionId,
+            pymts__Original_Amount__c = amount,
+            pymts__Remaining_Balance__c = amount
         );
         insert credit;
     }
     
     private static void savePaymentMethod(PaymentData data, PaymentResponse response) {
         // Check if payment method already exists
-        List<pymtTest__Payment_Method__c> existing = [
-            SELECT Id FROM pymtTest__Payment_Method__c
-            WHERE pymtTest__Gateway_Token__c = :response.paymentMethodToken
-            AND pymtTest__Account__c = :data.accountId
+        List<pymts__Payment_Method__c> existing = [
+            SELECT Id FROM pymts__Payment_Method__c
+            WHERE pymts__Gateway_Token__c = :response.paymentMethodToken
+            AND pymts__Account__c = :data.accountId
             LIMIT 1
         ];
         
@@ -633,32 +633,32 @@ public with sharing class PaymentService {
     }
     
     private static void reverseAllocations(Id transactionId, Decimal amount) {
-        List<pymtTest__Payment_Allocation__c> allocations = [
-            SELECT Id, pymtTest__Invoice__c, pymtTest__Amount__c
-            FROM pymtTest__Payment_Allocation__c
-            WHERE pymtTest__Transaction__c = :transactionId
+        List<pymts__Payment_Allocation__c> allocations = [
+            SELECT Id, pymts__Invoice__c, pymts__Amount__c
+            FROM pymts__Payment_Allocation__c
+            WHERE pymts__Transaction__c = :transactionId
         ];
         
         Set<Id> invoiceIds = new Set<Id>();
         Map<Id, Decimal> reverseAmounts = new Map<Id, Decimal>();
         
-        for (pymtTest__Payment_Allocation__c alloc : allocations) {
-            invoiceIds.add(alloc.pymtTest__Invoice__c);
-            reverseAmounts.put(alloc.pymtTest__Invoice__c, alloc.pymtTest__Amount__c);
+        for (pymts__Payment_Allocation__c alloc : allocations) {
+            invoiceIds.add(alloc.pymts__Invoice__c);
+            reverseAmounts.put(alloc.pymts__Invoice__c, alloc.pymts__Amount__c);
         }
         
-        List<pymtTest__Invoice__c> invoices = [
-            SELECT Id, pymtTest__Amount_Paid__c, pymtTest__Status__c
-            FROM pymtTest__Invoice__c
+        List<pymts__Invoice__c> invoices = [
+            SELECT Id, pymts__Amount_Paid__c, pymts__Status__c
+            FROM pymts__Invoice__c
             WHERE Id IN :invoiceIds
         ];
         
-        for (pymtTest__Invoice__c inv : invoices) {
-            inv.pymtTest__Amount_Paid__c -= reverseAmounts.get(inv.Id);
-            if (inv.pymtTest__Amount_Paid__c < 0) {
-                inv.pymtTest__Amount_Paid__c = 0;
+        for (pymts__Invoice__c inv : invoices) {
+            inv.pymts__Amount_Paid__c -= reverseAmounts.get(inv.Id);
+            if (inv.pymts__Amount_Paid__c < 0) {
+                inv.pymts__Amount_Paid__c = 0;
             }
-            inv.pymtTest__Status__c = inv.pymtTest__Amount_Paid__c > 0 ? 'Partially Paid' : 'Pending';
+            inv.pymts__Status__c = inv.pymts__Amount_Paid__c > 0 ? 'Partially Paid' : 'Pending';
         }
         
         update invoices;
@@ -710,17 +710,17 @@ public with sharing class PaymentService {
         @AuraEnabled public Id gatewayId { get; set; }
         @AuraEnabled public String gatewayName { get; set; }
         
-        public InvoiceWrapper(pymtTest__Invoice__c inv) {
+        public InvoiceWrapper(pymts__Invoice__c inv) {
             this.id = inv.Id;
             this.name = inv.Name;
-            this.totalAmount = inv.pymtTest__Total_Amount__c;
-            this.amountPaid = inv.pymtTest__Amount_Paid__c;
-            this.balanceDue = inv.pymtTest__Balance_Due__c;
-            this.dueDate = inv.pymtTest__Due_Date__c;
-            this.status = inv.pymtTest__Status__c;
-            this.orderNumber = inv.pymtTest__Order__r?.OrderNumber;
-            this.gatewayId = inv.pymtTest__Payment_Gateway__c;
-            this.gatewayName = inv.pymtTest__Payment_Gateway__r?.Name;
+            this.totalAmount = inv.pymts__Total_Amount__c;
+            this.amountPaid = inv.pymts__Amount_Paid__c;
+            this.balanceDue = inv.pymts__Balance_Due__c;
+            this.dueDate = inv.pymts__Due_Date__c;
+            this.status = inv.pymts__Status__c;
+            this.orderNumber = inv.pymts__Order__r?.OrderNumber;
+            this.gatewayId = inv.pymts__Payment_Gateway__c;
+            this.gatewayName = inv.pymts__Payment_Gateway__r?.Name;
         }
     }
     
@@ -738,21 +738,21 @@ public with sharing class PaymentService {
         @AuraEnabled public String gatewayType { get; set; }
         @AuraEnabled public String displayName { get; set; }
         
-        public PaymentMethodWrapper(pymtTest__Payment_Method__c pm) {
+        public PaymentMethodWrapper(pymts__Payment_Method__c pm) {
             this.id = pm.Id;
             this.name = pm.Name;
-            this.type = pm.pymtTest__Type__c;
-            this.cardBrand = pm.pymtTest__Card_Brand__c;
-            this.lastFour = pm.pymtTest__Last_Four__c;
-            this.expMonth = pm.pymtTest__Expiration_Month__c != null ? 
-                           Integer.valueOf(pm.pymtTest__Expiration_Month__c) : null;
-            this.expYear = pm.pymtTest__Expiration_Year__c != null ? 
-                          Integer.valueOf(pm.pymtTest__Expiration_Year__c) : null;
-            this.isPrimary = pm.pymtTest__Is_Primary__c;
-            this.isExpired = pm.pymtTest__Is_Expired__c;
-            this.gatewayName = pm.pymtTest__Payment_Gateway__r?.Name;
-            this.gatewayType = pm.pymtTest__Payment_Gateway__r?.pymtTest__Gateway_Type__c;
-            this.displayName = pm.pymtTest__Card_Brand__c + ' •••• ' + pm.pymtTest__Last_Four__c;
+            this.type = pm.pymts__Type__c;
+            this.cardBrand = pm.pymts__Card_Brand__c;
+            this.lastFour = pm.pymts__Last_Four__c;
+            this.expMonth = pm.pymts__Expiration_Month__c != null ? 
+                           Integer.valueOf(pm.pymts__Expiration_Month__c) : null;
+            this.expYear = pm.pymts__Expiration_Year__c != null ? 
+                          Integer.valueOf(pm.pymts__Expiration_Year__c) : null;
+            this.isPrimary = pm.pymts__Is_Primary__c;
+            this.isExpired = pm.pymts__Is_Expired__c;
+            this.gatewayName = pm.pymts__Payment_Gateway__r?.Name;
+            this.gatewayType = pm.pymts__Payment_Gateway__r?.pymts__Gateway_Type__c;
+            this.displayName = pm.pymts__Card_Brand__c + ' •••• ' + pm.pymts__Last_Four__c;
         }
     }
 }

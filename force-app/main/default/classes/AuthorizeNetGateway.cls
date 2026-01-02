@@ -17,7 +17,7 @@ public class AuthorizeNetGateway extends PaymentGatewayBase {
         super(gatewayId);
     }
     
-    public AuthorizeNetGateway(pymtTest__Payment_Gateway__c gateway) {
+    public AuthorizeNetGateway(pymts__Payment_Gateway__c gateway) {
         super(gateway);
     }
     
@@ -31,16 +31,16 @@ public class AuthorizeNetGateway extends PaymentGatewayBase {
         // Example using custom metadata:
         String metadataName = this.isTestMode ? 'AuthNet_Test' : 'AuthNet_Live';
         
-        List<pymtTest__Gateway_Credential__mdt> creds = [
-            SELECT pymtTest__API_Login_Id__c, pymtTest__Transaction_Key__c
-            FROM pymtTest__Gateway_Credential__mdt
+        List<pymts__Gateway_Credential__mdt> creds = [
+            SELECT pymts__API_Login_Id__c, pymts__Transaction_Key__c
+            FROM pymts__Gateway_Credential__mdt
             WHERE DeveloperName = :metadataName
             LIMIT 1
         ];
         
         if (!creds.isEmpty()) {
-            this.apiLoginId = creds[0].pymtTest__API_Login_Id__c;
-            this.transactionKey = creds[0].pymtTest__Transaction_Key__c;
+            this.apiLoginId = creds[0].pymts__API_Login_Id__c;
+            this.transactionKey = creds[0].pymts__Transaction_Key__c;
         }
     }
     

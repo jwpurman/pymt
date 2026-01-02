@@ -1,4 +1,4 @@
-<messaging:emailTemplate subject="Payment Failed - Action Required" recipientType="Contact" relatedToType="pymtTest__Transaction__c">
+<messaging:emailTemplate subject="Payment Failed - Action Required" recipientType="Contact" relatedToType="pymts__Transaction__c">
     <messaging:htmlEmailBody >
         <html>
         <head>
@@ -26,9 +26,9 @@
                     
                     <div class="details">
                         <p><strong>Transaction Number:</strong> {!relatedTo.Name}</p>
-                        <p><strong>Amount:</strong> <span class="amount">${!relatedTo.pymtTest__Amount__c}</span></p>
+                        <p><strong>Amount:</strong> <span class="amount">${!relatedTo.pymts__Amount__c}</span></p>
                         <p><strong>Date:</strong> {!relatedTo.CreatedDate}</p>
-                        <p><strong>Reason:</strong> {!relatedTo.pymtTest__Response_Message__c}</p>
+                        <p><strong>Reason:</strong> {!relatedTo.pymts__Response_Message__c}</p>
                     </div>
                     
                     <h3>What to do next:</h3>
@@ -62,9 +62,9 @@ Unfortunately, we were unable to process your payment.
 Transaction Details:
 -------------------
 Transaction Number: {!relatedTo.Name}
-Amount: ${!relatedTo.pymtTest__Amount__c}
+Amount: ${!relatedTo.pymts__Amount__c}
 Date: {!relatedTo.CreatedDate}
-Reason: {!relatedTo.pymtTest__Response_Message__c}
+Reason: {!relatedTo.pymts__Response_Message__c}
 
 What to do next:
 - Verify your payment information is correct

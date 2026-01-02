@@ -11,42 +11,42 @@ private class PaymentWebhookEndpointTest {
         insert testAccount;
         
         // Create gateway
-        pymtTest__Payment_Gateway__c gateway = new pymtTest__Payment_Gateway__c(
+        pymts__Payment_Gateway__c gateway = new pymts__Payment_Gateway__c(
             Name = 'Test Gateway',
-            pymtTest__Gateway_Type__c = 'Stripe',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = true,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Stripe',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = true,
+            pymts__Environment__c = 'Test'
         );
         insert gateway;
         
         // Create invoice
-        pymtTest__Invoice__c invoice = new pymtTest__Invoice__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Total_Amount__c = 100.00,
-            pymtTest__Amount_Paid__c = 100.00,
-            pymtTest__Status__c = 'Paid',
-            pymtTest__Due_Date__c = Date.today()
+        pymts__Invoice__c invoice = new pymts__Invoice__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Total_Amount__c = 100.00,
+            pymts__Amount_Paid__c = 100.00,
+            pymts__Status__c = 'Paid',
+            pymts__Due_Date__c = Date.today()
         );
         insert invoice;
         
         // Create transaction
-        pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Payment_Gateway__c = gateway.Id,
-            pymtTest__Amount__c = 100.00,
-            pymtTest__Type__c = 'Sale',
-            pymtTest__Status__c = 'Approved',
-            pymtTest__Settlement_Status__c = 'Pending',
-            pymtTest__Gateway_Transaction_Id__c = 'pi_test_webhook'
+        pymts__Transaction__c txn = new pymts__Transaction__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Payment_Gateway__c = gateway.Id,
+            pymts__Amount__c = 100.00,
+            pymts__Type__c = 'Sale',
+            pymts__Status__c = 'Approved',
+            pymts__Settlement_Status__c = 'Pending',
+            pymts__Gateway_Transaction_Id__c = 'pi_test_webhook'
         );
         insert txn;
         
         // Create allocation
-        pymtTest__Payment_Allocation__c alloc = new pymtTest__Payment_Allocation__c(
-            pymtTest__Transaction__c = txn.Id,
-            pymtTest__Invoice__c = invoice.Id,
-            pymtTest__Amount__c = 100.00
+        pymts__Payment_Allocation__c alloc = new pymts__Payment_Allocation__c(
+            pymts__Transaction__c = txn.Id,
+            pymts__Invoice__c = invoice.Id,
+            pymts__Amount__c = 100.00
         );
         insert alloc;
     }
@@ -72,12 +72,12 @@ private class PaymentWebhookEndpointTest {
         System.assertEquals(200, res.statusCode, 'Should return 200');
         
         // Verify transaction was updated
-        pymtTest__Transaction__c txn = [
-            SELECT pymtTest__Settlement_Status__c 
-            FROM pymtTest__Transaction__c 
-            WHERE pymtTest__Gateway_Transaction_Id__c = 'pi_test_webhook'
+        pymts__Transaction__c txn = [
+            SELECT pymts__Settlement_Status__c 
+            FROM pymts__Transaction__c 
+            WHERE pymts__Gateway_Transaction_Id__c = 'pi_test_webhook'
         ];
-        System.assertEquals('Settled', txn.pymtTest__Settlement_Status__c, 'Should be settled');
+        System.assertEquals('Settled', txn.pymts__Settlement_Status__c, 'Should be settled');
     }
     
     @isTest
@@ -101,26 +101,26 @@ private class PaymentWebhookEndpointTest {
         System.assertEquals(200, res.statusCode, 'Should return 200');
         
         // Verify transaction was updated
-        pymtTest__Transaction__c txn = [
-            SELECT pymtTest__Status__c, pymtTest__Settlement_Status__c 
-            FROM pymtTest__Transaction__c 
-            WHERE pymtTest__Gateway_Transaction_Id__c = 'pi_test_webhook'
+        pymts__Transaction__c txn = [
+            SELECT pymts__Status__c, pymts__Settlement_Status__c 
+            FROM pymts__Transaction__c 
+            WHERE pymts__Gateway_Transaction_Id__c = 'pi_test_webhook'
         ];
-        System.assertEquals('Declined', txn.pymtTest__Status__c, 'Should be declined');
+        System.assertEquals('Declined', txn.pymts__Status__c, 'Should be declined');
         
         // Verify invoice was reversed
-        pymtTest__Invoice__c invoice = [
-            SELECT pymtTest__Amount_Paid__c, pymtTest__Status__c
-            FROM pymtTest__Invoice__c LIMIT 1
+        pymts__Invoice__c invoice = [
+            SELECT pymts__Amount_Paid__c, pymts__Status__c
+            FROM pymts__Invoice__c LIMIT 1
         ];
-        System.assertEquals(0, invoice.pymtTest__Amount_Paid__c, 'Payment should be reversed');
+        System.assertEquals(0, invoice.pymts__Amount_Paid__c, 'Payment should be reversed');
     }
     
     @isTest
     static void testStripeChargeRefunded() {
         // First set transaction as settled
-        pymtTest__Transaction__c txn = [SELECT Id FROM pymtTest__Transaction__c LIMIT 1];
-        txn.pymtTest__Settlement_Status__c = 'Settled';
+        pymts__Transaction__c txn = [SELECT Id FROM pymts__Transaction__c LIMIT 1];
+        txn.pymts__Settlement_Status__c = 'Settled';
         update txn;
         
         String webhookBody = '{"type":"charge.refunded","data":{"object":{"id":"pi_test_webhook","amount_refunded":10000}}}';
@@ -143,11 +143,11 @@ private class PaymentWebhookEndpointTest {
         
         // Verify transaction status
         txn = [
-            SELECT pymtTest__Status__c 
-            FROM pymtTest__Transaction__c 
-            WHERE pymtTest__Gateway_Transaction_Id__c = 'pi_test_webhook'
+            SELECT pymts__Status__c 
+            FROM pymts__Transaction__c 
+            WHERE pymts__Gateway_Transaction_Id__c = 'pi_test_webhook'
         ];
-        System.assertEquals('Refunded', txn.pymtTest__Status__c, 'Should be refunded');
+        System.assertEquals('Refunded', txn.pymts__Status__c, 'Should be refunded');
     }
     
     @isTest
@@ -171,13 +171,13 @@ private class PaymentWebhookEndpointTest {
         System.assertEquals(200, res.statusCode, 'Should return 200');
         
         // Verify settlement status
-        pymtTest__Transaction__c txn = [
-            SELECT pymtTest__Settlement_Status__c, pymtTest__Expected_Settlement_Date__c 
-            FROM pymtTest__Transaction__c 
-            WHERE pymtTest__Gateway_Transaction_Id__c = 'pi_test_webhook'
+        pymts__Transaction__c txn = [
+            SELECT pymts__Settlement_Status__c, pymts__Expected_Settlement_Date__c 
+            FROM pymts__Transaction__c 
+            WHERE pymts__Gateway_Transaction_Id__c = 'pi_test_webhook'
         ];
-        System.assertEquals('Pending Settlement', txn.pymtTest__Settlement_Status__c, 'Should be pending settlement');
-        System.assertNotEquals(null, txn.pymtTest__Expected_Settlement_Date__c, 'Expected date should be set');
+        System.assertEquals('Pending Settlement', txn.pymts__Settlement_Status__c, 'Should be pending settlement');
+        System.assertNotEquals(null, txn.pymts__Expected_Settlement_Date__c, 'Expected date should be set');
     }
     
     @isTest
@@ -201,9 +201,9 @@ private class PaymentWebhookEndpointTest {
         System.assertEquals(200, res.statusCode, 'Should return 200');
         
         // Verify audit log was created
-        List<pymtTest__Audit_Log__c> logs = [
-            SELECT pymtTest__Action__c FROM pymtTest__Audit_Log__c
-            WHERE pymtTest__Action__c LIKE '%Dispute%'
+        List<pymts__Audit_Log__c> logs = [
+            SELECT pymts__Action__c FROM pymts__Audit_Log__c
+            WHERE pymts__Action__c LIKE '%Dispute%'
         ];
         System.assert(!logs.isEmpty(), 'Dispute audit log should be created');
     }
@@ -211,24 +211,24 @@ private class PaymentWebhookEndpointTest {
     @isTest
     static void testAuthorizeNetPaymentCreated() {
         // Create AuthNet transaction
-        pymtTest__Payment_Gateway__c authNetGateway = new pymtTest__Payment_Gateway__c(
+        pymts__Payment_Gateway__c authNetGateway = new pymts__Payment_Gateway__c(
             Name = 'AuthNet Test',
-            pymtTest__Gateway_Type__c = 'Authorize.Net',
-            pymtTest__Active__c = true,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Authorize.Net',
+            pymts__Active__c = true,
+            pymts__Environment__c = 'Test'
         );
         insert authNetGateway;
         
         Account testAccount = [SELECT Id FROM Account LIMIT 1];
         
-        pymtTest__Transaction__c authNetTxn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Payment_Gateway__c = authNetGateway.Id,
-            pymtTest__Amount__c = 150.00,
-            pymtTest__Type__c = 'Sale',
-            pymtTest__Status__c = 'Pending',
-            pymtTest__Settlement_Status__c = 'Pending',
-            pymtTest__Gateway_Transaction_Id__c = '12345678'
+        pymts__Transaction__c authNetTxn = new pymts__Transaction__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Payment_Gateway__c = authNetGateway.Id,
+            pymts__Amount__c = 150.00,
+            pymts__Type__c = 'Sale',
+            pymts__Status__c = 'Pending',
+            pymts__Settlement_Status__c = 'Pending',
+            pymts__Gateway_Transaction_Id__c = '12345678'
         );
         insert authNetTxn;
         
@@ -252,24 +252,24 @@ private class PaymentWebhookEndpointTest {
         
         // Verify transaction was updated
         authNetTxn = [
-            SELECT pymtTest__Status__c, pymtTest__Settlement_Status__c 
-            FROM pymtTest__Transaction__c 
-            WHERE pymtTest__Gateway_Transaction_Id__c = '12345678'
+            SELECT pymts__Status__c, pymts__Settlement_Status__c 
+            FROM pymts__Transaction__c 
+            WHERE pymts__Gateway_Transaction_Id__c = '12345678'
         ];
-        System.assertEquals('Approved', authNetTxn.pymtTest__Status__c, 'Should be approved');
+        System.assertEquals('Approved', authNetTxn.pymts__Status__c, 'Should be approved');
     }
     
     @isTest
     static void testAuthorizeNetSilentPost() {
         Account testAccount = [SELECT Id FROM Account LIMIT 1];
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         
-        pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Payment_Gateway__c = gateway.Id,
-            pymtTest__Amount__c = 75.00,
-            pymtTest__Status__c = 'Pending',
-            pymtTest__Gateway_Transaction_Id__c = '87654321'
+        pymts__Transaction__c txn = new pymts__Transaction__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Payment_Gateway__c = gateway.Id,
+            pymts__Amount__c = 75.00,
+            pymts__Status__c = 'Pending',
+            pymts__Gateway_Transaction_Id__c = '87654321'
         );
         insert txn;
         
@@ -293,25 +293,25 @@ private class PaymentWebhookEndpointTest {
         
         // Verify transaction was updated
         txn = [
-            SELECT pymtTest__Status__c 
-            FROM pymtTest__Transaction__c 
-            WHERE pymtTest__Gateway_Transaction_Id__c = '87654321'
+            SELECT pymts__Status__c 
+            FROM pymts__Transaction__c 
+            WHERE pymts__Gateway_Transaction_Id__c = '87654321'
         ];
-        System.assertEquals('Approved', txn.pymtTest__Status__c, 'Should be approved');
+        System.assertEquals('Approved', txn.pymts__Status__c, 'Should be approved');
     }
     
     @isTest
     static void testBraintreeSettlement() {
         Account testAccount = [SELECT Id FROM Account LIMIT 1];
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         
-        pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Payment_Gateway__c = gateway.Id,
-            pymtTest__Amount__c = 250.00,
-            pymtTest__Status__c = 'Approved',
-            pymtTest__Settlement_Status__c = 'Pending',
-            pymtTest__Gateway_Transaction_Id__c = 'bt_txn_123'
+        pymts__Transaction__c txn = new pymts__Transaction__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Payment_Gateway__c = gateway.Id,
+            pymts__Amount__c = 250.00,
+            pymts__Status__c = 'Approved',
+            pymts__Settlement_Status__c = 'Pending',
+            pymts__Gateway_Transaction_Id__c = 'bt_txn_123'
         );
         insert txn;
         
@@ -335,11 +335,11 @@ private class PaymentWebhookEndpointTest {
         
         // Verify transaction was updated
         txn = [
-            SELECT pymtTest__Settlement_Status__c 
-            FROM pymtTest__Transaction__c 
-            WHERE pymtTest__Gateway_Transaction_Id__c = 'bt_txn_123'
+            SELECT pymts__Settlement_Status__c 
+            FROM pymts__Transaction__c 
+            WHERE pymts__Gateway_Transaction_Id__c = 'bt_txn_123'
         ];
-        System.assertEquals('Settled', txn.pymtTest__Settlement_Status__c, 'Should be settled');
+        System.assertEquals('Settled', txn.pymts__Settlement_Status__c, 'Should be settled');
     }
     
     @isTest

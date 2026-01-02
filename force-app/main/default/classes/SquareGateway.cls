@@ -6,7 +6,7 @@ public class SquareGateway extends PaymentGatewayBase {
     private static final String CLIENT_LIBRARY_URL = 'https://sandbox.web.squarecdn.com/v1/square.js';
     
     public SquareGateway(Id gatewayId) { super(gatewayId); }
-    public SquareGateway(pymtTest__Payment_Gateway__c gateway) { super(gateway); }
+    public SquareGateway(pymts__Payment_Gateway__c gateway) { super(gateway); }
     
     public override String getGatewayType() { return 'Square'; }
     protected override String getApiBaseUrl() { return this.isTestMode ? 'https://connect.squareupsandbox.com/v2' : 'https://connect.squareup.com/v2'; }

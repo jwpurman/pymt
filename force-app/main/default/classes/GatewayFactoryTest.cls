@@ -6,46 +6,46 @@ private class GatewayFactoryTest {
     
     @TestSetup
     static void setupTestData() {
-        List<pymtTest__Payment_Gateway__c> gateways = new List<pymtTest__Payment_Gateway__c>();
+        List<pymts__Payment_Gateway__c> gateways = new List<pymts__Payment_Gateway__c>();
         
-        gateways.add(new pymtTest__Payment_Gateway__c(
+        gateways.add(new pymts__Payment_Gateway__c(
             Name = 'Stripe Gateway',
-            pymtTest__Gateway_Type__c = 'Stripe',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = true,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Stripe',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = true,
+            pymts__Environment__c = 'Test'
         ));
         
-        gateways.add(new pymtTest__Payment_Gateway__c(
+        gateways.add(new pymts__Payment_Gateway__c(
             Name = 'AuthNet Gateway',
-            pymtTest__Gateway_Type__c = 'Authorize.Net',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = false,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Authorize.Net',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = false,
+            pymts__Environment__c = 'Test'
         ));
         
-        gateways.add(new pymtTest__Payment_Gateway__c(
+        gateways.add(new pymts__Payment_Gateway__c(
             Name = 'Braintree Gateway',
-            pymtTest__Gateway_Type__c = 'Braintree',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = false,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Braintree',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = false,
+            pymts__Environment__c = 'Test'
         ));
         
-        gateways.add(new pymtTest__Payment_Gateway__c(
+        gateways.add(new pymts__Payment_Gateway__c(
             Name = 'PayPal Gateway',
-            pymtTest__Gateway_Type__c = 'PayPal',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = false,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'PayPal',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = false,
+            pymts__Environment__c = 'Test'
         ));
         
-        gateways.add(new pymtTest__Payment_Gateway__c(
+        gateways.add(new pymts__Payment_Gateway__c(
             Name = 'Square Gateway',
-            pymtTest__Gateway_Type__c = 'Square',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = false,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Square',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = false,
+            pymts__Environment__c = 'Test'
         ));
         
         insert gateways;
@@ -53,9 +53,9 @@ private class GatewayFactoryTest {
     
     @isTest
     static void testCreateStripeGateway() {
-        pymtTest__Payment_Gateway__c gateway = [
-            SELECT Id FROM pymtTest__Payment_Gateway__c 
-            WHERE pymtTest__Gateway_Type__c = 'Stripe'
+        pymts__Payment_Gateway__c gateway = [
+            SELECT Id FROM pymts__Payment_Gateway__c 
+            WHERE pymts__Gateway_Type__c = 'Stripe'
         ];
         
         Test.startTest();
@@ -69,9 +69,9 @@ private class GatewayFactoryTest {
     
     @isTest
     static void testCreateAuthorizeNetGateway() {
-        pymtTest__Payment_Gateway__c gateway = [
-            SELECT Id FROM pymtTest__Payment_Gateway__c 
-            WHERE pymtTest__Gateway_Type__c = 'Authorize.Net'
+        pymts__Payment_Gateway__c gateway = [
+            SELECT Id FROM pymts__Payment_Gateway__c 
+            WHERE pymts__Gateway_Type__c = 'Authorize.Net'
         ];
         
         Test.startTest();
@@ -85,9 +85,9 @@ private class GatewayFactoryTest {
     
     @isTest
     static void testCreateBraintreeGateway() {
-        pymtTest__Payment_Gateway__c gateway = [
-            SELECT Id FROM pymtTest__Payment_Gateway__c 
-            WHERE pymtTest__Gateway_Type__c = 'Braintree'
+        pymts__Payment_Gateway__c gateway = [
+            SELECT Id FROM pymts__Payment_Gateway__c 
+            WHERE pymts__Gateway_Type__c = 'Braintree'
         ];
         
         Test.startTest();
@@ -100,9 +100,9 @@ private class GatewayFactoryTest {
     
     @isTest
     static void testCreatePayPalGateway() {
-        pymtTest__Payment_Gateway__c gateway = [
-            SELECT Id FROM pymtTest__Payment_Gateway__c 
-            WHERE pymtTest__Gateway_Type__c = 'PayPal'
+        pymts__Payment_Gateway__c gateway = [
+            SELECT Id FROM pymts__Payment_Gateway__c 
+            WHERE pymts__Gateway_Type__c = 'PayPal'
         ];
         
         Test.startTest();
@@ -115,9 +115,9 @@ private class GatewayFactoryTest {
     
     @isTest
     static void testCreateSquareGateway() {
-        pymtTest__Payment_Gateway__c gateway = [
-            SELECT Id FROM pymtTest__Payment_Gateway__c 
-            WHERE pymtTest__Gateway_Type__c = 'Square'
+        pymts__Payment_Gateway__c gateway = [
+            SELECT Id FROM pymts__Payment_Gateway__c 
+            WHERE pymts__Gateway_Type__c = 'Square'
         ];
         
         Test.startTest();
@@ -153,10 +153,10 @@ private class GatewayFactoryTest {
     @isTest
     static void testNoDefaultGateway() {
         // Deactivate all gateways
-        List<pymtTest__Payment_Gateway__c> gateways = [SELECT Id FROM pymtTest__Payment_Gateway__c];
-        for (pymtTest__Payment_Gateway__c gw : gateways) {
-            gw.pymtTest__Is_Default__c = false;
-            gw.pymtTest__Active__c = false;
+        List<pymts__Payment_Gateway__c> gateways = [SELECT Id FROM pymts__Payment_Gateway__c];
+        for (pymts__Payment_Gateway__c gw : gateways) {
+            gw.pymts__Is_Default__c = false;
+            gw.pymts__Active__c = false;
         }
         update gateways;
         

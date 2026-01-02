@@ -4,7 +4,7 @@
  */
 public abstract class PaymentGatewayBase implements PaymentGateway {
     
-    protected pymtTest__Payment_Gateway__c gatewayConfig;
+    protected pymts__Payment_Gateway__c gatewayConfig;
     protected String apiKey;
     protected String publicKey;
     protected Boolean isTestMode;
@@ -21,7 +21,7 @@ public abstract class PaymentGatewayBase implements PaymentGateway {
      * @description Constructor with gateway record
      * @param gateway The Payment Gateway record
      */
-    public PaymentGatewayBase(pymtTest__Payment_Gateway__c gateway) {
+    public PaymentGatewayBase(pymts__Payment_Gateway__c gateway) {
         this.gatewayConfig = gateway;
         initializeFromConfig();
     }
@@ -32,9 +32,9 @@ public abstract class PaymentGatewayBase implements PaymentGateway {
      */
     protected virtual void loadConfiguration(Id gatewayId) {
         this.gatewayConfig = [
-            SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c,
-                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c
-            FROM pymtTest__Payment_Gateway__c
+            SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c,
+                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c
+            FROM pymts__Payment_Gateway__c
             WHERE Id = :gatewayId
             LIMIT 1
         ];
@@ -45,8 +45,8 @@ public abstract class PaymentGatewayBase implements PaymentGateway {
      * @description Initialize instance variables from configuration
      */
     protected virtual void initializeFromConfig() {
-        this.isTestMode = this.gatewayConfig.pymtTest__Environment__c == 'Test';
-        this.publicKey = this.gatewayConfig.pymtTest__Public_Key__c;
+        this.isTestMode = this.gatewayConfig.pymts__Environment__c == 'Test';
+        this.publicKey = this.gatewayConfig.pymts__Public_Key__c;
         // API key should be loaded from Named Credential or Protected Custom Metadata
         this.apiKey = getSecureApiKey();
     }
@@ -128,7 +128,7 @@ public abstract class PaymentGatewayBase implements PaymentGateway {
      */
     public virtual Boolean validateConfiguration() {
         return this.gatewayConfig != null 
-            && this.gatewayConfig.pymtTest__Active__c 
+            && this.gatewayConfig.pymts__Active__c 
             && String.isNotBlank(this.apiKey);
     }
     

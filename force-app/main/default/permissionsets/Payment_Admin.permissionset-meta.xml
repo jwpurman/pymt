@@ -12,7 +12,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>pymtTest__Payment_Gateway__c</object>
+        <object>pymts__Payment_Gateway__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -21,7 +21,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>pymtTest__Payment_Method__c</object>
+        <object>pymts__Payment_Method__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -30,7 +30,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>pymtTest__Transaction__c</object>
+        <object>pymts__Transaction__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -39,7 +39,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>pymtTest__Invoice__c</object>
+        <object>pymts__Invoice__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -48,7 +48,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>pymtTest__Invoice_Line_Item__c</object>
+        <object>pymts__Invoice_Line_Item__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -57,7 +57,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>pymtTest__Payment_Allocation__c</object>
+        <object>pymts__Payment_Allocation__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -66,7 +66,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>pymtTest__Account_Credit__c</object>
+        <object>pymts__Account_Credit__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -75,24 +75,24 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>pymtTest__Retry_Log__c</object>
+        <object>pymts__Retry_Log__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     
     <!-- Field Permissions for Payment Gateway -->
     <fieldPermissions>
         <editable>true</editable>
-        <field>pymtTest__Payment_Gateway__c.pymtTest__Active__c</field>
+        <field>pymts__Payment_Gateway__c.pymts__Active__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>pymtTest__Payment_Gateway__c.pymtTest__Public_Key__c</field>
+        <field>pymts__Payment_Gateway__c.pymts__Public_Key__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>pymtTest__Payment_Gateway__c.pymtTest__Is_Default__c</field>
+        <field>pymts__Payment_Gateway__c.pymts__Is_Default__c</field>
         <readable>true</readable>
     </fieldPermissions>
     

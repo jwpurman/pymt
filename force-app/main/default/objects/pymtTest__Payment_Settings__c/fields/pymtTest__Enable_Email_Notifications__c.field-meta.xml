@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>pymtTest__Enable_Email_Notifications__c</fullName>
-    <defaultValue>true</defaultValue>
-    <description>Enable email notifications for payment events</description>
-    <externalId>false</externalId>
-    <label>Enable Email Notifications</label>
-    <type>Checkbox</type>
-</CustomField>

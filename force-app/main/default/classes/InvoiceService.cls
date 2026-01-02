@@ -14,9 +14,9 @@ public with sharing class InvoiceService {
         try {
             Order ord = [
                 SELECT Id, OrderNumber, AccountId, EffectiveDate, EndDate,
-                       pymtTest__Payment_Frequency__c, TotalAmount,
+                       pymts__Payment_Frequency__c, TotalAmount,
                        (SELECT Id, Product2Id, Product2.Name, Quantity, UnitPrice, 
-                        TotalPrice, Product2.pymtTest__Is_Recurring__c
+                        TotalPrice, Product2.pymts__Is_Recurring__c
                         FROM OrderItems)
                 FROM Order
                 WHERE Id = :orderId
@@ -27,24 +27,24 @@ public with sharing class InvoiceService {
                 throw new InvoiceServiceException('Order EffectiveDate is required');
             }
             
-            String frequency = ord.pymtTest__Payment_Frequency__c != null ? 
-                              ord.pymtTest__Payment_Frequency__c : 'One-Time';
+            String frequency = ord.pymts__Payment_Frequency__c != null ? 
+                              ord.pymts__Payment_Frequency__c : 'One-Time';
             
             // Calculate invoice dates and amounts
             List<InvoiceData> invoiceDataList = calculateInvoiceSchedule(ord, frequency);
             
             // Create invoices
-            List<pymtTest__Invoice__c> invoices = new List<pymtTest__Invoice__c>();
+            List<pymts__Invoice__c> invoices = new List<pymts__Invoice__c>();
             for (InvoiceData data : invoiceDataList) {
-                pymtTest__Invoice__c inv = new pymtTest__Invoice__c(
-                    pymtTest__Account__c = ord.AccountId,
-                    pymtTest__Order__c = ord.Id,
-                    pymtTest__Total_Amount__c = data.amount,
-                    pymtTest__Due_Date__c = data.dueDate,
-                    pymtTest__Scheduled_Payment_Date__c = data.dueDate,
-                    pymtTest__Status__c = 'Scheduled',
-                    pymtTest__Auto_Pay__c = true,
-                    pymtTest__Amount_Paid__c = 0
+                pymts__Invoice__c inv = new pymts__Invoice__c(
+                    pymts__Account__c = ord.AccountId,
+                    pymts__Order__c = ord.Id,
+                    pymts__Total_Amount__c = data.amount,
+                    pymts__Due_Date__c = data.dueDate,
+                    pymts__Scheduled_Payment_Date__c = data.dueDate,
+                    pymts__Status__c = 'Scheduled',
+                    pymts__Auto_Pay__c = true,
+                    pymts__Amount_Paid__c = 0
                 );
                 invoices.add(inv);
             }
@@ -52,18 +52,18 @@ public with sharing class InvoiceService {
             insert invoices;
             
             // Create invoice line items
-            List<pymtTest__Invoice_Line_Item__c> lineItems = new List<pymtTest__Invoice_Line_Item__c>();
+            List<pymts__Invoice_Line_Item__c> lineItems = new List<pymts__Invoice_Line_Item__c>();
             
             for (Integer i = 0; i < invoices.size(); i++) {
-                pymtTest__Invoice__c inv = invoices[i];
+                pymts__Invoice__c inv = invoices[i];
                 InvoiceData data = invoiceDataList[i];
                 
                 for (LineItemData lid : data.lineItems) {
-                    lineItems.add(new pymtTest__Invoice_Line_Item__c(
-                        pymtTest__Invoice__c = inv.Id,
-                        pymtTest__Description__c = lid.description,
-                        pymtTest__Quantity__c = lid.quantity,
-                        pymtTest__Unit_Price__c = lid.unitPrice
+                    lineItems.add(new pymts__Invoice_Line_Item__c(
+                        pymts__Invoice__c = inv.Id,
+                        pymts__Description__c = lid.description,
+                        pymts__Quantity__c = lid.quantity,
+                        pymts__Unit_Price__c = lid.unitPrice
                     ));
                 }
             }
@@ -72,7 +72,7 @@ public with sharing class InvoiceService {
             
             // Return invoice IDs
             List<Id> invoiceIds = new List<Id>();
-            for (pymtTest__Invoice__c inv : invoices) {
+            for (pymts__Invoice__c inv : invoices) {
                 invoiceIds.add(inv.Id);
             }
             
@@ -99,7 +99,7 @@ public with sharing class InvoiceService {
         List<OrderItem> recurringItems = new List<OrderItem>();
         
         for (OrderItem oi : ord.OrderItems) {
-            Boolean isRecurring = oi.Product2.pymtTest__Is_Recurring__c == true;
+            Boolean isRecurring = oi.Product2.pymts__Is_Recurring__c == true;
             if (isRecurring) {
                 recurringTotal += oi.TotalPrice;
                 recurringItems.add(oi);
@@ -240,9 +240,9 @@ public with sharing class InvoiceService {
     public static Order getOrderDetails(Id orderId) {
         return [
             SELECT Id, OrderNumber, AccountId, Account.Name, EffectiveDate, EndDate,
-                   Status, TotalAmount, pymtTest__Payment_Frequency__c,
+                   Status, TotalAmount, pymts__Payment_Frequency__c,
                    (SELECT Id, Product2Id, Product2.Name, Quantity, UnitPrice, 
-                    TotalPrice, Description, Product2.pymtTest__Is_Recurring__c
+                    TotalPrice, Description, Product2.pymts__Is_Recurring__c
                     FROM OrderItems)
             FROM Order
             WHERE Id = :orderId
@@ -259,16 +259,16 @@ public with sharing class InvoiceService {
     public static List<InvoicePreview> previewInvoices(Id orderId, Integer paymentTermsDays) {
         Order ord = [
             SELECT Id, OrderNumber, AccountId, EffectiveDate, EndDate,
-                   pymtTest__Payment_Frequency__c, TotalAmount,
+                   pymts__Payment_Frequency__c, TotalAmount,
                    (SELECT Id, Product2Id, Product2.Name, Quantity, UnitPrice, 
-                    TotalPrice, Product2.pymtTest__Is_Recurring__c
+                    TotalPrice, Product2.pymts__Is_Recurring__c
                     FROM OrderItems)
             FROM Order
             WHERE Id = :orderId
         ];
         
-        String frequency = ord.pymtTest__Payment_Frequency__c != null ? 
-                          ord.pymtTest__Payment_Frequency__c : 'One-Time';
+        String frequency = ord.pymts__Payment_Frequency__c != null ? 
+                          ord.pymts__Payment_Frequency__c : 'One-Time';
         
         List<InvoiceData> invoiceDataList = calculateInvoiceSchedule(ord, frequency);
         List<InvoicePreview> previews = new List<InvoicePreview>();
@@ -293,17 +293,17 @@ public with sharing class InvoiceService {
     @AuraEnabled
     public static void cancelInvoice(Id invoiceId) {
         try {
-            pymtTest__Invoice__c invoice = [
-                SELECT Id, pymtTest__Status__c, pymtTest__Amount_Paid__c
-                FROM pymtTest__Invoice__c
+            pymts__Invoice__c invoice = [
+                SELECT Id, pymts__Status__c, pymts__Amount_Paid__c
+                FROM pymts__Invoice__c
                 WHERE Id = :invoiceId
             ];
             
-            if (invoice.pymtTest__Amount_Paid__c > 0) {
+            if (invoice.pymts__Amount_Paid__c > 0) {
                 throw new InvoiceServiceException('Cannot cancel an invoice with payments applied');
             }
             
-            invoice.pymtTest__Status__c = 'Cancelled';
+            invoice.pymts__Status__c = 'Cancelled';
             update invoice;
             
         } catch (Exception e) {
@@ -318,22 +318,22 @@ public with sharing class InvoiceService {
      */
     @AuraEnabled(cacheable=true)
     public static InvoiceDetailWrapper getInvoiceDetails(Id invoiceId) {
-        pymtTest__Invoice__c invoice = [
-            SELECT Id, Name, pymtTest__Total_Amount__c, pymtTest__Amount_Paid__c,
-                   pymtTest__Balance_Due__c, pymtTest__Due_Date__c, pymtTest__Status__c,
-                   pymtTest__Account__c, pymtTest__Account__r.Name,
-                   pymtTest__Order__c, pymtTest__Order__r.OrderNumber,
-                   pymtTest__Payment_Gateway__c, pymtTest__Payment_Gateway__r.Name,
-                   pymtTest__Scheduled_Payment_Date__c, pymtTest__Auto_Pay__c,
-                   pymtTest__Retry_Count__c, CreatedDate,
-                   (SELECT Id, pymtTest__Description__c, pymtTest__Quantity__c, 
-                    pymtTest__Unit_Price__c, pymtTest__Total_Amount__c
-                    FROM pymtTest__Invoice_Line_Items__r),
-                   (SELECT Id, Name, pymtTest__Amount__c, 
-                    pymtTest__Transaction__r.Name, pymtTest__Transaction__r.pymtTest__Status__c,
-                    pymtTest__Transaction__r.CreatedDate
-                    FROM pymtTest__Payment_Allocations__r)
-            FROM pymtTest__Invoice__c
+        pymts__Invoice__c invoice = [
+            SELECT Id, Name, pymts__Total_Amount__c, pymts__Amount_Paid__c,
+                   pymts__Balance_Due__c, pymts__Due_Date__c, pymts__Status__c,
+                   pymts__Account__c, pymts__Account__r.Name,
+                   pymts__Order__c, pymts__Order__r.OrderNumber,
+                   pymts__Payment_Gateway__c, pymts__Payment_Gateway__r.Name,
+                   pymts__Scheduled_Payment_Date__c, pymts__Auto_Pay__c,
+                   pymts__Retry_Count__c, CreatedDate,
+                   (SELECT Id, pymts__Description__c, pymts__Quantity__c, 
+                    pymts__Unit_Price__c, pymts__Total_Amount__c
+                    FROM pymts__Invoice_Line_Items__r),
+                   (SELECT Id, Name, pymts__Amount__c, 
+                    pymts__Transaction__r.Name, pymts__Transaction__r.pymts__Status__c,
+                    pymts__Transaction__r.CreatedDate
+                    FROM pymts__Payment_Allocations__r)
+            FROM pymts__Invoice__c
             WHERE Id = :invoiceId
         ];
         
@@ -349,24 +349,24 @@ public with sharing class InvoiceService {
     public static void updateAllocations(Id transactionId, List<AllocationUpdate> allocations) {
         try {
             // Get existing allocations
-            List<pymtTest__Payment_Allocation__c> existing = [
-                SELECT Id, pymtTest__Invoice__c, pymtTest__Amount__c
-                FROM pymtTest__Payment_Allocation__c
-                WHERE pymtTest__Transaction__c = :transactionId
+            List<pymts__Payment_Allocation__c> existing = [
+                SELECT Id, pymts__Invoice__c, pymts__Amount__c
+                FROM pymts__Payment_Allocation__c
+                WHERE pymts__Transaction__c = :transactionId
             ];
             
             // Build map of changes
             Map<Id, Decimal> oldAmounts = new Map<Id, Decimal>();
             Map<Id, Id> allocationIds = new Map<Id, Id>();
             
-            for (pymtTest__Payment_Allocation__c alloc : existing) {
-                oldAmounts.put(alloc.pymtTest__Invoice__c, alloc.pymtTest__Amount__c);
-                allocationIds.put(alloc.pymtTest__Invoice__c, alloc.Id);
+            for (pymts__Payment_Allocation__c alloc : existing) {
+                oldAmounts.put(alloc.pymts__Invoice__c, alloc.pymts__Amount__c);
+                allocationIds.put(alloc.pymts__Invoice__c, alloc.Id);
             }
             
             // Update allocations and calculate invoice changes
-            List<pymtTest__Payment_Allocation__c> toUpdate = new List<pymtTest__Payment_Allocation__c>();
-            List<pymtTest__Payment_Allocation__c> toInsert = new List<pymtTest__Payment_Allocation__c>();
+            List<pymts__Payment_Allocation__c> toUpdate = new List<pymts__Payment_Allocation__c>();
+            List<pymts__Payment_Allocation__c> toInsert = new List<pymts__Payment_Allocation__c>();
             Map<Id, Decimal> invoiceDeltas = new Map<Id, Decimal>();
             
             for (AllocationUpdate au : allocations) {
@@ -377,16 +377,16 @@ public with sharing class InvoiceService {
                 
                 if (allocationIds.containsKey(au.invoiceId)) {
                     // Update existing
-                    toUpdate.add(new pymtTest__Payment_Allocation__c(
+                    toUpdate.add(new pymts__Payment_Allocation__c(
                         Id = allocationIds.get(au.invoiceId),
-                        pymtTest__Amount__c = au.amount
+                        pymts__Amount__c = au.amount
                     ));
                 } else {
                     // Create new
-                    toInsert.add(new pymtTest__Payment_Allocation__c(
-                        pymtTest__Transaction__c = transactionId,
-                        pymtTest__Invoice__c = au.invoiceId,
-                        pymtTest__Amount__c = au.amount
+                    toInsert.add(new pymts__Payment_Allocation__c(
+                        pymts__Transaction__c = transactionId,
+                        pymts__Invoice__c = au.invoiceId,
+                        pymts__Amount__c = au.amount
                     ));
                 }
             }
@@ -395,14 +395,14 @@ public with sharing class InvoiceService {
             if (!toInsert.isEmpty()) insert toInsert;
             
             // Update invoice amounts
-            List<pymtTest__Invoice__c> invoices = [
-                SELECT Id, pymtTest__Amount_Paid__c, pymtTest__Total_Amount__c, pymtTest__Status__c
-                FROM pymtTest__Invoice__c
+            List<pymts__Invoice__c> invoices = [
+                SELECT Id, pymts__Amount_Paid__c, pymts__Total_Amount__c, pymts__Status__c
+                FROM pymts__Invoice__c
                 WHERE Id IN :invoiceDeltas.keySet()
             ];
             
-            for (pymtTest__Invoice__c inv : invoices) {
-                inv.pymtTest__Amount_Paid__c += invoiceDeltas.get(inv.Id);
+            for (pymts__Invoice__c inv : invoices) {
+                inv.pymts__Amount_Paid__c += invoiceDeltas.get(inv.Id);
                 updateInvoiceStatus(inv);
             }
             
@@ -413,13 +413,13 @@ public with sharing class InvoiceService {
         }
     }
     
-    private static void updateInvoiceStatus(pymtTest__Invoice__c invoice) {
-        Decimal balance = invoice.pymtTest__Total_Amount__c - invoice.pymtTest__Amount_Paid__c;
+    private static void updateInvoiceStatus(pymts__Invoice__c invoice) {
+        Decimal balance = invoice.pymts__Total_Amount__c - invoice.pymts__Amount_Paid__c;
         
         if (balance <= 0) {
-            invoice.pymtTest__Status__c = 'Paid';
-        } else if (invoice.pymtTest__Amount_Paid__c > 0) {
-            invoice.pymtTest__Status__c = 'Partially Paid';
+            invoice.pymts__Status__c = 'Paid';
+        } else if (invoice.pymts__Amount_Paid__c > 0) {
+            invoice.pymts__Status__c = 'Partially Paid';
         }
     }
     
@@ -464,26 +464,26 @@ public with sharing class InvoiceService {
         @AuraEnabled public List<LineItemWrapper> lineItems { get; set; }
         @AuraEnabled public List<PaymentWrapper> payments { get; set; }
         
-        public InvoiceDetailWrapper(pymtTest__Invoice__c inv) {
+        public InvoiceDetailWrapper(pymts__Invoice__c inv) {
             this.id = inv.Id;
             this.name = inv.Name;
-            this.totalAmount = inv.pymtTest__Total_Amount__c;
-            this.amountPaid = inv.pymtTest__Amount_Paid__c;
-            this.balanceDue = inv.pymtTest__Balance_Due__c;
-            this.dueDate = inv.pymtTest__Due_Date__c;
-            this.status = inv.pymtTest__Status__c;
-            this.accountName = inv.pymtTest__Account__r?.Name;
-            this.orderNumber = inv.pymtTest__Order__r?.OrderNumber;
-            this.gatewayName = inv.pymtTest__Payment_Gateway__r?.Name;
-            this.autoPay = inv.pymtTest__Auto_Pay__c;
+            this.totalAmount = inv.pymts__Total_Amount__c;
+            this.amountPaid = inv.pymts__Amount_Paid__c;
+            this.balanceDue = inv.pymts__Balance_Due__c;
+            this.dueDate = inv.pymts__Due_Date__c;
+            this.status = inv.pymts__Status__c;
+            this.accountName = inv.pymts__Account__r?.Name;
+            this.orderNumber = inv.pymts__Order__r?.OrderNumber;
+            this.gatewayName = inv.pymts__Payment_Gateway__r?.Name;
+            this.autoPay = inv.pymts__Auto_Pay__c;
             
             this.lineItems = new List<LineItemWrapper>();
-            for (pymtTest__Invoice_Line_Item__c li : inv.pymtTest__Invoice_Line_Items__r) {
+            for (pymts__Invoice_Line_Item__c li : inv.pymts__Invoice_Line_Items__r) {
                 this.lineItems.add(new LineItemWrapper(li));
             }
             
             this.payments = new List<PaymentWrapper>();
-            for (pymtTest__Payment_Allocation__c pa : inv.pymtTest__Payment_Allocations__r) {
+            for (pymts__Payment_Allocation__c pa : inv.pymts__Payment_Allocations__r) {
                 this.payments.add(new PaymentWrapper(pa));
             }
         }
@@ -496,12 +496,12 @@ public with sharing class InvoiceService {
         @AuraEnabled public Decimal unitPrice { get; set; }
         @AuraEnabled public Decimal totalAmount { get; set; }
         
-        public LineItemWrapper(pymtTest__Invoice_Line_Item__c li) {
+        public LineItemWrapper(pymts__Invoice_Line_Item__c li) {
             this.id = li.Id;
-            this.description = li.pymtTest__Description__c;
-            this.quantity = li.pymtTest__Quantity__c;
-            this.unitPrice = li.pymtTest__Unit_Price__c;
-            this.totalAmount = li.pymtTest__Total_Amount__c;
+            this.description = li.pymts__Description__c;
+            this.quantity = li.pymts__Quantity__c;
+            this.unitPrice = li.pymts__Unit_Price__c;
+            this.totalAmount = li.pymts__Total_Amount__c;
         }
     }
     
@@ -512,11 +512,11 @@ public with sharing class InvoiceService {
         @AuraEnabled public String status { get; set; }
         @AuraEnabled public Datetime paymentDate { get; set; }
         
-        public PaymentWrapper(pymtTest__Payment_Allocation__c pa) {
+        public PaymentWrapper(pymts__Payment_Allocation__c pa) {
             this.id = pa.Id;
-            this.amount = pa.pymtTest__Amount__c;
-            this.transactionName = pa.pymtTest__Transaction__r?.Name;
-            this.status = pa.pymtTest__Transaction__r?.pymtTest__Status__c;
+            this.amount = pa.pymts__Amount__c;
+            this.transactionName = pa.pymts__Transaction__r?.Name;
+            this.status = pa.pymts__Transaction__r?.pymts__Status__c;
             this.paymentDate = pa.CreatedDate;
         }
     }

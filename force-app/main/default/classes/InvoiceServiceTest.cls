@@ -11,12 +11,12 @@ private class InvoiceServiceTest {
         insert testAccount;
         
         // Create test gateway
-        pymtTest__Payment_Gateway__c gateway = new pymtTest__Payment_Gateway__c(
+        pymts__Payment_Gateway__c gateway = new pymts__Payment_Gateway__c(
             Name = 'Test Gateway',
-            pymtTest__Gateway_Type__c = 'Stripe',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = true,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Stripe',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = true,
+            pymts__Environment__c = 'Test'
         );
         insert gateway;
         
@@ -24,7 +24,7 @@ private class InvoiceServiceTest {
         Product2 testProduct = new Product2(
             Name = 'Test Product',
             IsActive = true,
-            pymtTest__Is_Recurring__c = false
+            pymts__Is_Recurring__c = false
         );
         insert testProduct;
         
@@ -32,7 +32,7 @@ private class InvoiceServiceTest {
         Product2 recurringProduct = new Product2(
             Name = 'Recurring Service',
             IsActive = true,
-            pymtTest__Is_Recurring__c = true
+            pymts__Is_Recurring__c = true
         );
         insert recurringProduct;
         
@@ -70,7 +70,7 @@ private class InvoiceServiceTest {
             EndDate = Date.today(),
             Status = 'Draft',
             Pricebook2Id = stdPricebookId,
-            pymtTest__Payment_Frequency__c = 'One-Time'
+            pymts__Payment_Frequency__c = 'One-Time'
         );
         insert testOrder;
         
@@ -94,13 +94,13 @@ private class InvoiceServiceTest {
         
         System.assertEquals(1, invoiceIds.size(), 'Should create 1 invoice for one-time order');
         
-        pymtTest__Invoice__c invoice = [
-            SELECT pymtTest__Total_Amount__c, pymtTest__Status__c 
-            FROM pymtTest__Invoice__c 
+        pymts__Invoice__c invoice = [
+            SELECT pymts__Total_Amount__c, pymts__Status__c 
+            FROM pymts__Invoice__c 
             WHERE Id = :invoiceIds[0]
         ];
-        System.assertEquals(200.00, invoice.pymtTest__Total_Amount__c, 'Invoice total should be 200');
-        System.assertEquals('Pending', invoice.pymtTest__Status__c, 'Status should be Pending');
+        System.assertEquals(200.00, invoice.pymts__Total_Amount__c, 'Invoice total should be 200');
+        System.assertEquals('Pending', invoice.pymts__Status__c, 'Status should be Pending');
     }
     
     @isTest
@@ -117,7 +117,7 @@ private class InvoiceServiceTest {
             EndDate = Date.today().addMonths(3),
             Status = 'Draft',
             Pricebook2Id = stdPricebookId,
-            pymtTest__Payment_Frequency__c = 'Monthly'
+            pymts__Payment_Frequency__c = 'Monthly'
         );
         insert testOrder;
         
@@ -141,15 +141,15 @@ private class InvoiceServiceTest {
         
         System.assertEquals(3, invoiceIds.size(), 'Should create 3 invoices for 3-month subscription');
         
-        List<pymtTest__Invoice__c> invoices = [
-            SELECT pymtTest__Total_Amount__c, pymtTest__Invoice_Date__c 
-            FROM pymtTest__Invoice__c 
+        List<pymts__Invoice__c> invoices = [
+            SELECT pymts__Total_Amount__c, pymts__Invoice_Date__c 
+            FROM pymts__Invoice__c 
             WHERE Id IN :invoiceIds
-            ORDER BY pymtTest__Invoice_Date__c ASC
+            ORDER BY pymts__Invoice_Date__c ASC
         ];
         
-        for (pymtTest__Invoice__c inv : invoices) {
-            System.assertEquals(50.00, inv.pymtTest__Total_Amount__c, 'Each invoice should be 50');
+        for (pymts__Invoice__c inv : invoices) {
+            System.assertEquals(50.00, inv.pymts__Total_Amount__c, 'Each invoice should be 50');
         }
     }
     
@@ -167,7 +167,7 @@ private class InvoiceServiceTest {
             EndDate = Date.today().addMonths(12),
             Status = 'Draft',
             Pricebook2Id = stdPricebookId,
-            pymtTest__Payment_Frequency__c = 'Quarterly'
+            pymts__Payment_Frequency__c = 'Quarterly'
         );
         insert testOrder;
         
@@ -204,7 +204,7 @@ private class InvoiceServiceTest {
             EndDate = Date.today().addYears(2),
             Status = 'Draft',
             Pricebook2Id = stdPricebookId,
-            pymtTest__Payment_Frequency__c = 'Annual'
+            pymts__Payment_Frequency__c = 'Annual'
         );
         insert testOrder;
         
@@ -230,51 +230,51 @@ private class InvoiceServiceTest {
     @isTest
     static void testGetInvoiceDetails() {
         Account testAccount = [SELECT Id FROM Account WHERE Name = 'Test Company' LIMIT 1];
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         
         // Create invoice
-        pymtTest__Invoice__c invoice = new pymtTest__Invoice__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Total_Amount__c = 250.00,
-            pymtTest__Amount_Paid__c = 100.00,
-            pymtTest__Status__c = 'Partially Paid',
-            pymtTest__Due_Date__c = Date.today().addDays(30),
-            pymtTest__Payment_Gateway__c = gateway.Id
+        pymts__Invoice__c invoice = new pymts__Invoice__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Total_Amount__c = 250.00,
+            pymts__Amount_Paid__c = 100.00,
+            pymts__Status__c = 'Partially Paid',
+            pymts__Due_Date__c = Date.today().addDays(30),
+            pymts__Payment_Gateway__c = gateway.Id
         );
         insert invoice;
         
         // Create line items
-        List<pymtTest__Invoice_Line_Item__c> lineItems = new List<pymtTest__Invoice_Line_Item__c>{
-            new pymtTest__Invoice_Line_Item__c(
-                pymtTest__Invoice__c = invoice.Id,
-                pymtTest__Description__c = 'Product A',
-                pymtTest__Quantity__c = 2,
-                pymtTest__Unit_Price__c = 75.00
+        List<pymts__Invoice_Line_Item__c> lineItems = new List<pymts__Invoice_Line_Item__c>{
+            new pymts__Invoice_Line_Item__c(
+                pymts__Invoice__c = invoice.Id,
+                pymts__Description__c = 'Product A',
+                pymts__Quantity__c = 2,
+                pymts__Unit_Price__c = 75.00
             ),
-            new pymtTest__Invoice_Line_Item__c(
-                pymtTest__Invoice__c = invoice.Id,
-                pymtTest__Description__c = 'Product B',
-                pymtTest__Quantity__c = 1,
-                pymtTest__Unit_Price__c = 100.00
+            new pymts__Invoice_Line_Item__c(
+                pymts__Invoice__c = invoice.Id,
+                pymts__Description__c = 'Product B',
+                pymts__Quantity__c = 1,
+                pymts__Unit_Price__c = 100.00
             )
         };
         insert lineItems;
         
         // Create transaction
-        pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Payment_Gateway__c = gateway.Id,
-            pymtTest__Amount__c = 100.00,
-            pymtTest__Type__c = 'Sale',
-            pymtTest__Status__c = 'Approved'
+        pymts__Transaction__c txn = new pymts__Transaction__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Payment_Gateway__c = gateway.Id,
+            pymts__Amount__c = 100.00,
+            pymts__Type__c = 'Sale',
+            pymts__Status__c = 'Approved'
         );
         insert txn;
         
         // Create allocation
-        pymtTest__Payment_Allocation__c alloc = new pymtTest__Payment_Allocation__c(
-            pymtTest__Transaction__c = txn.Id,
-            pymtTest__Invoice__c = invoice.Id,
-            pymtTest__Amount__c = 100.00
+        pymts__Payment_Allocation__c alloc = new pymts__Payment_Allocation__c(
+            pymts__Transaction__c = txn.Id,
+            pymts__Invoice__c = invoice.Id,
+            pymts__Amount__c = 100.00
         );
         insert alloc;
         
@@ -292,40 +292,40 @@ private class InvoiceServiceTest {
     @isTest
     static void testUpdateAllocations() {
         Account testAccount = [SELECT Id FROM Account WHERE Name = 'Test Company' LIMIT 1];
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         
         // Create invoices
-        List<pymtTest__Invoice__c> invoices = new List<pymtTest__Invoice__c>();
+        List<pymts__Invoice__c> invoices = new List<pymts__Invoice__c>();
         for (Integer i = 0; i < 2; i++) {
-            invoices.add(new pymtTest__Invoice__c(
-                pymtTest__Account__c = testAccount.Id,
-                pymtTest__Total_Amount__c = 100.00,
-                pymtTest__Amount_Paid__c = 0,
-                pymtTest__Status__c = 'Pending',
-                pymtTest__Due_Date__c = Date.today().addDays(30)
+            invoices.add(new pymts__Invoice__c(
+                pymts__Account__c = testAccount.Id,
+                pymts__Total_Amount__c = 100.00,
+                pymts__Amount_Paid__c = 0,
+                pymts__Status__c = 'Pending',
+                pymts__Due_Date__c = Date.today().addDays(30)
             ));
         }
         insert invoices;
         
         // Create transaction
-        pymtTest__Transaction__c txn = new pymtTest__Transaction__c(
-            pymtTest__Account__c = testAccount.Id,
-            pymtTest__Payment_Gateway__c = gateway.Id,
-            pymtTest__Amount__c = 150.00,
-            pymtTest__Type__c = 'Sale',
-            pymtTest__Status__c = 'Approved'
+        pymts__Transaction__c txn = new pymts__Transaction__c(
+            pymts__Account__c = testAccount.Id,
+            pymts__Payment_Gateway__c = gateway.Id,
+            pymts__Amount__c = 150.00,
+            pymts__Type__c = 'Sale',
+            pymts__Status__c = 'Approved'
         );
         insert txn;
         
         // Create initial allocation (all to first invoice)
-        pymtTest__Payment_Allocation__c alloc = new pymtTest__Payment_Allocation__c(
-            pymtTest__Transaction__c = txn.Id,
-            pymtTest__Invoice__c = invoices[0].Id,
-            pymtTest__Amount__c = 150.00
+        pymts__Payment_Allocation__c alloc = new pymts__Payment_Allocation__c(
+            pymts__Transaction__c = txn.Id,
+            pymts__Invoice__c = invoices[0].Id,
+            pymts__Amount__c = 150.00
         );
         insert alloc;
         
-        invoices[0].pymtTest__Amount_Paid__c = 150.00;
+        invoices[0].pymts__Amount_Paid__c = 150.00;
         update invoices[0];
         
         // Prepare new allocations (split between both invoices)
@@ -346,16 +346,16 @@ private class InvoiceServiceTest {
         Test.stopTest();
         
         // Verify allocations
-        List<pymtTest__Payment_Allocation__c> newAllocs = [
-            SELECT pymtTest__Invoice__c, pymtTest__Amount__c 
-            FROM pymtTest__Payment_Allocation__c 
-            WHERE pymtTest__Transaction__c = :txn.Id
-            ORDER BY pymtTest__Amount__c DESC
+        List<pymts__Payment_Allocation__c> newAllocs = [
+            SELECT pymts__Invoice__c, pymts__Amount__c 
+            FROM pymts__Payment_Allocation__c 
+            WHERE pymts__Transaction__c = :txn.Id
+            ORDER BY pymts__Amount__c DESC
         ];
         
         System.assertEquals(2, newAllocs.size(), 'Should have 2 allocations');
-        System.assertEquals(100.00, newAllocs[0].pymtTest__Amount__c, 'First allocation should be 100');
-        System.assertEquals(50.00, newAllocs[1].pymtTest__Amount__c, 'Second allocation should be 50');
+        System.assertEquals(100.00, newAllocs[0].pymts__Amount__c, 'First allocation should be 100');
+        System.assertEquals(50.00, newAllocs[1].pymts__Amount__c, 'Second allocation should be 50');
     }
     
     @isTest
@@ -374,7 +374,7 @@ private class InvoiceServiceTest {
             EndDate = Date.today().addMonths(3),
             Status = 'Draft',
             Pricebook2Id = stdPricebookId,
-            pymtTest__Payment_Frequency__c = 'Monthly'
+            pymts__Payment_Frequency__c = 'Monthly'
         );
         insert testOrder;
         
@@ -407,18 +407,18 @@ private class InvoiceServiceTest {
         // Should create 3 invoices: first has one-time + recurring, others have just recurring
         System.assertEquals(3, invoiceIds.size(), 'Should create 3 invoices');
         
-        List<pymtTest__Invoice__c> invoices = [
-            SELECT pymtTest__Total_Amount__c 
-            FROM pymtTest__Invoice__c 
+        List<pymts__Invoice__c> invoices = [
+            SELECT pymts__Total_Amount__c 
+            FROM pymts__Invoice__c 
             WHERE Id IN :invoiceIds
-            ORDER BY pymtTest__Invoice_Date__c ASC
+            ORDER BY pymts__Invoice_Date__c ASC
         ];
         
         // First invoice: 200 (one-time) + 30 (recurring) = 230
-        System.assertEquals(230.00, invoices[0].pymtTest__Total_Amount__c, 'First invoice should include one-time product');
+        System.assertEquals(230.00, invoices[0].pymts__Total_Amount__c, 'First invoice should include one-time product');
         
         // Subsequent invoices: just recurring
-        System.assertEquals(30.00, invoices[1].pymtTest__Total_Amount__c, 'Second invoice should only have recurring');
-        System.assertEquals(30.00, invoices[2].pymtTest__Total_Amount__c, 'Third invoice should only have recurring');
+        System.assertEquals(30.00, invoices[1].pymts__Total_Amount__c, 'Second invoice should only have recurring');
+        System.assertEquals(30.00, invoices[2].pymts__Total_Amount__c, 'Third invoice should only have recurring');
     }
 }

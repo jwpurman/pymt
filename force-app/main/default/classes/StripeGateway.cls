@@ -12,7 +12,7 @@ public class StripeGateway extends PaymentGatewayBase {
         super(gatewayId);
     }
     
-    public StripeGateway(pymtTest__Payment_Gateway__c gateway) {
+    public StripeGateway(pymts__Payment_Gateway__c gateway) {
         super(gateway);
     }
     

@@ -6,7 +6,7 @@
     }
   ],
   "name": "dx-empty",
-  "namespace": "",
+  "namespace": "pymts",
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "64.0"
 }

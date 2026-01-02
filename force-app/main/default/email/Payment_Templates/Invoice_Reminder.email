@@ -1,4 +1,4 @@
-<messaging:emailTemplate subject="Invoice Reminder: {!relatedTo.Name} - Payment Due" recipientType="Contact" relatedToType="pymtTest__Invoice__c">
+<messaging:emailTemplate subject="Invoice Reminder: {!relatedTo.Name} - Payment Due" recipientType="Contact" relatedToType="pymts__Invoice__c">
     <messaging:htmlEmailBody >
         <html>
         <head>
@@ -28,8 +28,8 @@
                     
                     <div class="details" style="text-align: center;">
                         <p><strong>Invoice Number:</strong> {!relatedTo.Name}</p>
-                        <p class="amount">${!relatedTo.pymtTest__Total_Amount__c}</p>
-                        <p class="due-date">Due Date: {!relatedTo.pymtTest__Due_Date__c}</p>
+                        <p class="amount">${!relatedTo.pymts__Total_Amount__c}</p>
+                        <p class="due-date">Due Date: {!relatedTo.pymts__Due_Date__c}</p>
                     </div>
                     
                     <table class="summary-table">
@@ -39,15 +39,15 @@
                         </tr>
                         <tr>
                             <td>Invoice Total</td>
-                            <td style="text-align: right;">${!relatedTo.pymtTest__Total_Amount__c}</td>
+                            <td style="text-align: right;">${!relatedTo.pymts__Total_Amount__c}</td>
                         </tr>
                         <tr>
                             <td>Amount Paid</td>
-                            <td style="text-align: right;">${!relatedTo.pymtTest__Amount_Paid__c}</td>
+                            <td style="text-align: right;">${!relatedTo.pymts__Amount_Paid__c}</td>
                         </tr>
                         <tr style="font-weight: bold;">
                             <td>Balance Due</td>
-                            <td style="text-align: right;">${!relatedTo.pymtTest__Balance_Due__c}</td>
+                            <td style="text-align: right;">${!relatedTo.pymts__Balance_Due__c}</td>
                         </tr>
                     </table>
                     
@@ -76,10 +76,10 @@ This is a friendly reminder that payment is due for the following invoice:
 Invoice Details:
 ----------------
 Invoice Number: {!relatedTo.Name}
-Invoice Total: ${!relatedTo.pymtTest__Total_Amount__c}
-Amount Paid: ${!relatedTo.pymtTest__Amount_Paid__c}
-Balance Due: ${!relatedTo.pymtTest__Balance_Due__c}
-Due Date: {!relatedTo.pymtTest__Due_Date__c}
+Invoice Total: ${!relatedTo.pymts__Total_Amount__c}
+Amount Paid: ${!relatedTo.pymts__Amount_Paid__c}
+Balance Due: ${!relatedTo.pymts__Balance_Due__c}
+Due Date: {!relatedTo.pymts__Due_Date__c}
 
 If you have already made this payment, please disregard this reminder. Payments can take 1-2 business days to be reflected in your account.
 

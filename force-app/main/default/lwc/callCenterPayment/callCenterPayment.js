@@ -89,7 +89,7 @@ export default class CallCenterPayment extends LightningElement {
     
     get paymentMethodOptions() {
         return this.paymentMethods.map(pm => ({
-            label: `${pm.pymtTest__Type__c} ending in ${pm.pymtTest__Last_Four__c}${pm.pymtTest__Is_Primary__c ? ' (Primary)' : ''}`,
+            label: `${pm.pymts__Type__c} ending in ${pm.pymts__Last_Four__c}${pm.pymts__Is_Primary__c ? ' (Primary)' : ''}`,
             value: pm.Id
         }));
     }
@@ -276,7 +276,7 @@ export default class CallCenterPayment extends LightningElement {
             this.paymentMethods = await getPaymentMethods({ accountId: this.selectedAccount.Id });
             if (this.paymentMethods.length > 0) {
                 // Auto-select primary or first method
-                const primary = this.paymentMethods.find(pm => pm.pymtTest__Is_Primary__c);
+                const primary = this.paymentMethods.find(pm => pm.pymts__Is_Primary__c);
                 this.selectedPaymentMethodId = primary ? primary.Id : this.paymentMethods[0].Id;
             }
         } catch (error) {

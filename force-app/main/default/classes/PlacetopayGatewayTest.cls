@@ -7,19 +7,19 @@ private class PlacetopayGatewayTest {
     @TestSetup
     static void setupTestData() {
         // Create test gateway
-        pymtTest__Payment_Gateway__c gateway = new pymtTest__Payment_Gateway__c(
+        pymts__Payment_Gateway__c gateway = new pymts__Payment_Gateway__c(
             Name = 'Test Placetopay Gateway',
-            pymtTest__Gateway_Type__c = 'Placetopay',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = true,
-            pymtTest__Environment__c = 'Test'
+            pymts__Gateway_Type__c = 'Placetopay',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = true,
+            pymts__Environment__c = 'Test'
         );
         insert gateway;
     }
     
     @isTest
     static void testGetGatewayType() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         PlacetopayGateway ptpGateway = new PlacetopayGateway(gateway.Id);
         
         System.assertEquals('Placetopay', ptpGateway.getGatewayType(), 'Gateway type should be Placetopay');
@@ -27,7 +27,7 @@ private class PlacetopayGatewayTest {
     
     @isTest
     static void testGetClientLibraryUrl() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         PlacetopayGateway ptpGateway = new PlacetopayGateway(gateway.Id);
         
         String url = ptpGateway.getClientLibraryUrl();
@@ -36,9 +36,9 @@ private class PlacetopayGatewayTest {
     
     @isTest
     static void testSaleSuccess() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c, 
-                                                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c 
-                                            FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c, 
+                                                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c 
+                                            FROM pymts__Payment_Gateway__c LIMIT 1];
         PlacetopayGateway ptpGateway = new PlacetopayGateway(gateway);
         
         PaymentRequest request = new PaymentRequest();
@@ -61,9 +61,9 @@ private class PlacetopayGatewayTest {
     
     @isTest
     static void testSaleFailure() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c, 
-                                                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c 
-                                            FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c, 
+                                                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c 
+                                            FROM pymts__Payment_Gateway__c LIMIT 1];
         PlacetopayGateway ptpGateway = new PlacetopayGateway(gateway);
         
         PaymentRequest request = new PaymentRequest();
@@ -83,9 +83,9 @@ private class PlacetopayGatewayTest {
     
     @isTest
     static void testAuthorize() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c, 
-                                                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c 
-                                            FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c, 
+                                                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c 
+                                            FROM pymts__Payment_Gateway__c LIMIT 1];
         PlacetopayGateway ptpGateway = new PlacetopayGateway(gateway);
         
         PaymentRequest request = new PaymentRequest();
@@ -105,9 +105,9 @@ private class PlacetopayGatewayTest {
     
     @isTest
     static void testRefund() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c, 
-                                                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c 
-                                            FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c, 
+                                                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c 
+                                            FROM pymts__Payment_Gateway__c LIMIT 1];
         PlacetopayGateway ptpGateway = new PlacetopayGateway(gateway);
         
         Test.startTest();
@@ -120,9 +120,9 @@ private class PlacetopayGatewayTest {
     
     @isTest
     static void testVoidTransaction() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c, 
-                                                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c 
-                                            FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c, 
+                                                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c 
+                                            FROM pymts__Payment_Gateway__c LIMIT 1];
         PlacetopayGateway ptpGateway = new PlacetopayGateway(gateway);
         
         Test.startTest();
@@ -135,9 +135,9 @@ private class PlacetopayGatewayTest {
     
     @isTest
     static void testCreateToken() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c, 
-                                                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c 
-                                            FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c, 
+                                                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c 
+                                            FROM pymts__Payment_Gateway__c LIMIT 1];
         PlacetopayGateway ptpGateway = new PlacetopayGateway(gateway);
         
         TokenRequest tokenRequest = new TokenRequest();
@@ -158,9 +158,9 @@ private class PlacetopayGatewayTest {
     
     @isTest
     static void testCapture() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c, 
-                                                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c 
-                                            FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c, 
+                                                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c 
+                                            FROM pymts__Payment_Gateway__c LIMIT 1];
         PlacetopayGateway ptpGateway = new PlacetopayGateway(gateway);
         
         Test.startTest();
@@ -172,9 +172,9 @@ private class PlacetopayGatewayTest {
     
     @isTest
     static void testCreateCustomer() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c, 
-                                                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c 
-                                            FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c, 
+                                                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c 
+                                            FROM pymts__Payment_Gateway__c LIMIT 1];
         PlacetopayGateway ptpGateway = new PlacetopayGateway(gateway);
         
         CustomerRequest customerRequest = new CustomerRequest();
@@ -190,9 +190,9 @@ private class PlacetopayGatewayTest {
     
     @isTest
     static void testGetSessionStatus() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id, Name, pymtTest__Gateway_Type__c, pymtTest__Active__c, 
-                                                   pymtTest__Environment__c, pymtTest__Public_Key__c, pymtTest__Is_Default__c 
-                                            FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id, Name, pymts__Gateway_Type__c, pymts__Active__c, 
+                                                   pymts__Environment__c, pymts__Public_Key__c, pymts__Is_Default__c 
+                                            FROM pymts__Payment_Gateway__c LIMIT 1];
         PlacetopayGateway ptpGateway = new PlacetopayGateway(gateway);
         
         Test.startTest();
@@ -205,7 +205,7 @@ private class PlacetopayGatewayTest {
     
     @isTest
     static void testGatewayFactoryCreatesPlacetopay() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         
         Test.startTest();
         PaymentGateway createdGateway = GatewayFactory.getGateway(gateway.Id);

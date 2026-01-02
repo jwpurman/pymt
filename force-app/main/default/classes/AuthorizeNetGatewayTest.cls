@@ -6,20 +6,20 @@ private class AuthorizeNetGatewayTest {
     
     @TestSetup
     static void setupTestData() {
-        pymtTest__Payment_Gateway__c gateway = new pymtTest__Payment_Gateway__c(
+        pymts__Payment_Gateway__c gateway = new pymts__Payment_Gateway__c(
             Name = 'Test Authorize.Net',
-            pymtTest__Gateway_Type__c = 'Authorize.Net',
-            pymtTest__Active__c = true,
-            pymtTest__Is_Default__c = true,
-            pymtTest__Environment__c = 'Test',
-            pymtTest__Public_Key__c = 'test_client_key'
+            pymts__Gateway_Type__c = 'Authorize.Net',
+            pymts__Active__c = true,
+            pymts__Is_Default__c = true,
+            pymts__Environment__c = 'Test',
+            pymts__Public_Key__c = 'test_client_key'
         );
         insert gateway;
     }
     
     @isTest
     static void testGetGatewayType() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         
         Test.startTest();
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
@@ -31,7 +31,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testGetClientLibraryUrl() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         
         Test.startTest();
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
@@ -43,7 +43,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testSaleSuccess() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         PaymentRequest request = new PaymentRequest();
@@ -64,7 +64,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testSaleDeclined() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         PaymentRequest request = new PaymentRequest();
@@ -82,7 +82,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testAuthorize() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         PaymentRequest request = new PaymentRequest();
@@ -100,7 +100,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testCapture() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new AuthNetPaymentSuccessMock());
@@ -114,7 +114,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testRefund() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new AuthNetPaymentSuccessMock());
@@ -128,7 +128,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testVoidTransaction() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new AuthNetPaymentSuccessMock());
@@ -142,7 +142,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testCreateCustomer() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         CustomerRequest request = new CustomerRequest();
@@ -160,7 +160,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testGetTransactionDetails() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new AuthNetTransactionDetailsMock());
@@ -176,7 +176,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testGetTransactionDetailsWithReturn() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new AuthNetTransactionReturnedMock());
@@ -192,7 +192,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testGetUnsettledTransactions() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new AuthNetUnsettledListMock());
@@ -206,7 +206,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testGetSettledBatches() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         Test.setMock(HttpCalloutMock.class, new AuthNetBatchListMock());
@@ -222,7 +222,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testProcessACHPayment() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         AuthorizeNetGateway.ACHPaymentRequest achRequest = new AuthorizeNetGateway.ACHPaymentRequest();
@@ -247,7 +247,7 @@ private class AuthorizeNetGatewayTest {
     
     @isTest
     static void testCreateToken() {
-        pymtTest__Payment_Gateway__c gateway = [SELECT Id FROM pymtTest__Payment_Gateway__c LIMIT 1];
+        pymts__Payment_Gateway__c gateway = [SELECT Id FROM pymts__Payment_Gateway__c LIMIT 1];
         AuthorizeNetGateway authNetGateway = new AuthorizeNetGateway(gateway.Id);
         
         TokenRequest request = new TokenRequest();
